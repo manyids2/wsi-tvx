@@ -1,5 +1,6 @@
 #include "slide.h"
 #include "state.h"
+#include "term.h"
 #include <ev.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +12,19 @@ ev_io stdin_watcher;
 static void stdin_cb(EV_P_ ev_io *w, int revents) {
   ev_io_stop(EV_A_ w);         // Stop watching stdin
   ev_break(EV_A_ EVBREAK_ALL); // all nested ev_runs stop iterating
+  clearText();
+
+  int c = getKeypress();
+  switch (c) {
+  // Quit
+  case 'q':
+  case (CTRL_KEY('q')):
+    ev_io_stop(EV_A_ w);         // Stop watching stdin
+    ev_break(EV_A_ EVBREAK_ALL); // all nested ev_runs stop iterating
+    break;
+  default:
+    break;
+  }
 }
 
 int main(int argc, char **argv) {
@@ -19,9 +33,15 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  // Usual terminal setup
+  enableRawMode();
+  hideCursor();
+  clearScreen();
+  moveCursor(0, 0);
+
   // Get path to slide
   char *slide = argv[1];
-  printf("slidepath: %s\n", slide);
+  printf("slidepath: %s\r\n", slide);
 
   slideInit(&S, slide);
 

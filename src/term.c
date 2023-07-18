@@ -43,9 +43,10 @@ void disableRawMode(void) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
     die("tcsetattr");
 
-  // show cursor
-  if (write(STDOUT_FILENO, "\x1b[?25h", 6) < 0)
-    die("disableRawMode");
+  // reset and show cursor
+  clearScreen();
+  moveCursor(0, 0);
+  showCursor();
 }
 
 void enableRawMode(void) {
