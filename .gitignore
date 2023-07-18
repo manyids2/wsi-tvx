@@ -1,0 +1,10 @@
+# clang related
+compile_commands.json
+.cache
+
+# executables
+bin/
+
+# profiling
+gmon.out
+gmon.txt
