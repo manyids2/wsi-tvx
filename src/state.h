@@ -4,44 +4,44 @@
 
 // ---  View  ---
 
-typedef struct Position {
-  int64_t x, y, h, w;
-  int i, j;
-} Position;
-
-typedef struct Bounds {
-  int max_i, max_j;
-} Bounds;
-
+// Remains constant upto resize, new slide
 typedef struct World {
-  Position pos;
-  Position offset;
+  int64_t ww, wh; // Slide at max zoom in pixels
+  int vw, vh;     // Viewport in pixels
+  int rows, cols; // Viewport dims in rows, cols
+  int cw, ch;     // Character dims in pixels
+  int ox, oy;     // offset in pixels
+  int mi, mj;     // maximum tiles in view
+  int mlevel;     // maximum level ( = level_count - 1 )
 } World;
 
+// Remains constant upto level change or move
 typedef struct View {
-  int level;
-  Position pos;
-  Bounds max;
+  int level, left, top; // wrt slide at level
+  float downsample;    // downsample factor from max zoom
+  int64_t sw, sh;       // Slide level dims
+  int64_t sx, sy;       // Slide level position
+  int64_t wx, wy;       // World level position
 } View;
 
-typedef struct Slide {
-  int level;
-  Position pos;
-  Bounds max;
-} Slide;
-
+// Tile from slide ( params for load image )
 typedef struct Tile {
-  int vi, vj, si, sj, level;
-  int32_t kitty_id;
-  int thread_num, loaded, visible;
+  int si, sj, level;               // identity of tile
+  int vi, vj;                      // position wrt view
+  int32_t kitty_id;                // id used by kitty
+  int thread_num, loaded, visible; // status
 } Tile;
 
-typedef struct KittyTile {
-  int vi, vj, col, row, X, Y;
-} KittyPosition;
+// Tile on screen ( params for draw/clear image )
+typedef struct Position {
+  int i, j;           // Position in view grid
+  int col, row, X, Y; // Position in pixels
+  int32_t kitty_id;
+} Position;
 
 // ---  Threads  ---
 
+// From example program
 struct thread_info {
   pthread_t thread_id;
   int thread_num;

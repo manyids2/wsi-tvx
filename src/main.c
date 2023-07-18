@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-OpenSlide S;
+OpenSlide oslide;
+World world = {0};
+View view = {0};
 ev_io stdin_watcher;
 
 static void stdin_cb(EV_P_ ev_io *w, int revents) {
@@ -43,7 +45,35 @@ int main(int argc, char **argv) {
   char *slide = argv[1];
   printf("slidepath: %s\r\n", slide);
 
-  slideInit(&S, slide);
+  // Read slide info, get thumbnail
+  slideInit(&oslide, slide);
+
+  // Store dims of slide at max zoom
+  world.ww = oslide.level_w[0];
+  world.wh = oslide.level_h[0];
+
+  // Store dims of viewport in pixels
+  getWindowSize(&world.rows, &world.cols, &world.vw, &world.vh);
+  getWindowSizeKitty(&world.vw, &world.vh);
+
+  // Compute character dims
+  world.cw = world.vw / world.cols;
+  world.ch = world.vh / world.rows;
+
+  // Compute maximum level, cols and rows
+  world.mlevel = oslide.level_count - 1;
+  world.mi = world.vw / TILE_SIZE;
+  world.mj = world.vh / TILE_SIZE;
+
+  // Choose starting position and level ( least zoom )
+  view.level = world.mlevel;
+  view.wx = world.ww / 2;
+  view.wy = world.wh / 2;
+
+  // Compute corresponding slide position at level
+  view.downsample = oslide.downsamples[view.level];
+  view.sx = view.wx / view.downsample;
+  view.sy = view.wy / view.downsample;
 
   // Start the event loop
   struct ev_loop *loop = EV_DEFAULT;
@@ -56,7 +86,7 @@ int main(int argc, char **argv) {
   ev_run(loop, 0);
 
   // Free memory
-  slideFree(&S);
+  slideFree(&oslide);
 
   // Exit successfully
   return EXIT_SUCCESS;
