@@ -1,4 +1,5 @@
 #include "app.h"
+#include <stdio.h>
 
 void setup_term(void) {
   enable_raw_mode();
@@ -15,6 +16,8 @@ void app_init(app_t *app, char *slidepath) {
   // Start at minimum zoom
   int level = app->world->mlevel;
   setup_view(app, level);
+
+  app->last_pressed = INIT;
 }
 
 void setup_slide(slide_t *slide, char *slidepath) {
@@ -64,6 +67,15 @@ void setup_view(app_t *app, int level) {
   view->zoom = slide->downsamples[view->level];
   view->sx = view->wx / view->zoom;
   view->sy = view->wy / view->zoom;
+}
+
+void app_draw_statusline(app_t *app) {
+  char s[256];
+  int len = snprintf(s, sizeof(s), "Press 'h' for help  ( last_pressed:  %d )",
+                     app->last_pressed);
+
+  move_cursor(app->world->rows - 1, 1);
+  write_or_die(s, len, "app_draw_statusline");
 }
 
 void app_free(app_t *app) {

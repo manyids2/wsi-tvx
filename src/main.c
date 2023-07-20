@@ -9,7 +9,11 @@
 slide_t slide;
 world_t world = {0};
 view_t view = {0};
-app_t app = {.slide = &slide, .world = &world, .view = &view, 0};
+app_t app = {.slide = &slide,
+             .world = &world,
+             .view = &view,
+             .debug = 0,
+             .last_pressed = INIT};
 
 ev_io stdin_watcher;
 
@@ -18,6 +22,7 @@ static void stdin_cb(EV_P_ ev_io *w, int revents) {
     // NOTE: Expects at least one byte ( reads upto 3 )
     int c = get_keypress();
     handle_keypress(EV_A_ w, &app, c);
+    app_draw_statusline(&app);
   }
 }
 

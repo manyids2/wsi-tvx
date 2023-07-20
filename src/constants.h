@@ -2,15 +2,16 @@
 
 // --- Terminal ---
 enum keys_e {
-  QUIT = 1000,
-  MOVE_LEFT,
-  MOVE_RIGHT,
-  MOVE_UP,
-  MOVE_DOWN,
-  ZOOM_IN,
-  ZOOM_OUT,
-  TOGGLE_DEBUG,
-  TOGGLE_THUMBNAIL
+  INIT = 0,
+  MOVE_LEFT = 1,
+  MOVE_RIGHT = 2,
+  MOVE_UP = 3,
+  MOVE_DOWN = 4,
+  ZOOM_IN = 5,
+  ZOOM_OUT = 6,
+  TOGGLE_DEBUG = 7,
+  TOGGLE_THUMBNAIL = 8,
+  QUIT = 9,
 };
 
 // --- Basics ---

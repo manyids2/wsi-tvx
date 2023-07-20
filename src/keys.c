@@ -69,48 +69,58 @@ void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c) {
   case (CTRL_KEY('q')):
     ev_io_stop(EV_A_ w);         // Stop watching stdin
     ev_break(EV_A_ EVBREAK_ALL); // all nested ev_runs stop iterating
+    app->last_pressed = QUIT;
     break;
 
   // Up
   case MOVE_DOWN:
     // viewMoveDown(A.V);
+    app->last_pressed = MOVE_DOWN;
     break;
 
   // Down
   case MOVE_UP:
     // viewMoveUp(A.V);
+    app->last_pressed = MOVE_UP;
     break;
 
   // Left
   case MOVE_LEFT:
     // viewMoveLeft(A.V);
+    app->last_pressed = MOVE_LEFT;
     break;
 
   // Right
   case MOVE_RIGHT:
     // viewMoveRight(A.V);
+    app->last_pressed = MOVE_RIGHT;
     break;
 
   // Zoom in
   case ZOOM_IN:
     // viewZoomIn(A.V);
+    app->last_pressed = ZOOM_IN;
     break;
 
   // Zoom out
   case ZOOM_OUT:
     // viewZoomOut(A.V);
+    app->last_pressed = ZOOM_OUT;
     break;
 
   // Toggle thumbnail
   case TOGGLE_THUMBNAIL:
+    app->last_pressed = TOGGLE_THUMBNAIL;
     break;
 
   // Debug info
   case TOGGLE_DEBUG:
     app->debug = (app->debug + 1) % NUM_DEBUG; // loop through debug modes
+    app->last_pressed = TOGGLE_DEBUG;
     break;
 
   default:
+    app->last_pressed = INIT;
     break;
   }
 }
