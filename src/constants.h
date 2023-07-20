@@ -1,3 +1,5 @@
+#pragma once
+
 // ---  Slide  ---
 #define MAX_LEVELS 32
 #define MAX_ASSOCIATED_IMAGES 8
@@ -34,9 +36,19 @@
     exit(EXIT_FAILURE);                                                        \
   } while (0)
 
+#define die(msg)                                                               \
+  do {                                                                         \
+    perror(msg);                                                               \
+    exit(EXIT_FAILURE);                                                        \
+  } while (0)
+
 // ---  Write, if unsuccessful, exit  ---
 #define write_or_die(s, len, msg)                                              \
   if (write(STDOUT_FILENO, s, len) != len) {                                   \
     perror(msg);                                                               \
     exit(EXIT_FAILURE);                                                        \
   }
+
+// --- string ---
+#define slice(str, result, start, end)                                         \
+  strncpy(result, str + start, end - start);

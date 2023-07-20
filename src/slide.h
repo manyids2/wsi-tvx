@@ -5,7 +5,7 @@
 #include <string.h>
 
 // Constructor and destructor
-void slide_init(slide_t *S, char *slide);
+void slide_init(slide_t *S, char *slidepath);
 void slide_free(slide_t *S);
 
 // Get (i, j)th tile from level (l), given tile size (ts)

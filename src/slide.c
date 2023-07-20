@@ -1,8 +1,8 @@
 #include "slide.h"
 
-void slide_init(slide_t *S, char *slide) {
+void slide_init(slide_t *S, char *slidepath) {
   // Open ( exit if error )
-  openslide_t *osr = openslide_open(slide);
+  openslide_t *osr = openslide_open(slidepath);
   assert(osr != NULL && openslide_get_error(osr) == NULL);
   S->osr = osr;
 
@@ -10,7 +10,7 @@ void slide_init(slide_t *S, char *slide) {
   S->level_count = openslide_get_level_count(osr);
   assert(S->level_count < MAX_LEVELS);
 
-  // Store downsamples ( scale factors ), level_w, level_h
+  // Store downsamples ( zoom ), level_w, level_h
   for (int32_t level = 0; level < openslide_get_level_count(osr); level++) {
     S->downsamples[level] = openslide_get_level_downsample(osr, level);
     openslide_get_level_dimensions(osr, level, &S->level_w[level],
@@ -19,7 +19,6 @@ void slide_init(slide_t *S, char *slide) {
 }
 
 void slide_load_thumbnail(slide_t *S) {
-  // Get associated images
   const char *const *associated_image_names =
       openslide_get_associated_image_names(S->osr);
 

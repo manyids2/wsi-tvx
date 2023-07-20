@@ -2,41 +2,20 @@
 
 struct termios orig_termios;
 
-void die(const char *s) {
-  perror(s);
-  exit(1);
-}
-
-void slice(const char *str, char *result, size_t start, size_t end) {
-  strncpy(result, str + start, end - start);
-}
-
-void clear_screen(void) {
-  if (write(STDOUT_FILENO, "\x1b[2J", 4) != 4)
-    die("clearScreen");
-}
+void clear_screen(void) { write_or_die("\x1b[2J", 4, "clear_screen"); }
 
 void clear_text(void) {
   move_cursor(0, 0);
-  if (write(STDOUT_FILENO, "\x1b[0J\x1b[1J", 8) < 0)
-    die("clearText");
+  write_or_die("\x1b[0J\x1b[1J", 8, "clear_text");
 }
 
-void hide_cursor(void) {
-  if (write(STDOUT_FILENO, "\x1b[?25l", 6) < 0)
-    die("hideCursor");
-}
-
-void show_cursor(void) {
-  if (write(STDOUT_FILENO, "\x1b[?25h", 6) < 0)
-    die("showCursor");
-}
+void hide_cursor(void) { write_or_die("\x1b[?25l", 6, "hide_cursor"); }
+void show_cursor(void) { write_or_die("\x1b[?25h", 6, "show_cursor"); }
 
 void move_cursor(int row, int col) {
-  char s[32]; // giri giri
+  char s[32];
   int len = snprintf(s, sizeof(s), "\x1b[%d;%dH", row, col);
-  if (write(STDOUT_FILENO, s, len) < 0)
-    die("moveCursor");
+  write_or_die(s, len, "move_cursor");
 }
 
 void term_disable_raw_mode(void) {
@@ -80,8 +59,7 @@ int get_window_size(int *rows, int *cols, int *vw, int *vh) {
 
 void get_window_size_kitty(int *vw, int *vh) {
   // Read window size using kitty
-  if (write(STDOUT_FILENO, "\x1b[14t", 5) < 0)
-    die("getWindowSizeKitty");
+  write_or_die("\x1b[14t", 5, "get_window_size_kitty");
 
   // Read response
   char str[16];

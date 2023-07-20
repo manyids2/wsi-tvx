@@ -1,3 +1,4 @@
+#include "constants.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,9 +8,7 @@
 #include <unistd.h>
 
 #define CTRL_KEY(k) ((k)&0x1f)
-enum viewerKey { ARROW_LEFT = 1000, ARROW_RIGHT, ARROW_UP, ARROW_DOWN };
-
-void die(const char *s);
+enum keys_e { ARROW_LEFT = 1000, ARROW_RIGHT, ARROW_UP, ARROW_DOWN };
 
 void term_disable_raw_mode(void);
 void term_enable_raw_mode(void);
