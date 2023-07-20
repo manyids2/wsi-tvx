@@ -1,6 +1,6 @@
 #include "slide.h"
 
-void slideInit(OpenSlide *S, char *slide) {
+void slide_init(slide_t *S, char *slide) {
   // Open ( exit if error )
   openslide_t *osr = openslide_open(slide);
   assert(osr != NULL && openslide_get_error(osr) == NULL);
@@ -16,10 +16,12 @@ void slideInit(OpenSlide *S, char *slide) {
     openslide_get_level_dimensions(osr, level, &S->level_w[level],
                                    &S->level_h[level]);
   }
+}
 
+void slide_load_thumbnail(slide_t *S) {
   // Get associated images
   const char *const *associated_image_names =
-      openslide_get_associated_image_names(osr);
+      openslide_get_associated_image_names(S->osr);
 
   S->has_thumbnail = 0;
   while (*associated_image_names) {
@@ -27,7 +29,7 @@ void slideInit(OpenSlide *S, char *slide) {
     const char *name = *associated_image_names;
     if (!strcmp(name, "thumbnail\0")) {
       // Get size of thumbnail
-      openslide_get_associated_image_dimensions(osr, name, &w, &h);
+      openslide_get_associated_image_dimensions(S->osr, name, &w, &h);
 
       // Allocate
       S->has_thumbnail = 1;
@@ -36,7 +38,7 @@ void slideInit(OpenSlide *S, char *slide) {
       S->thumbnail = malloc(h * w * sizeof(uint32_t));
 
       // Read thumbnail
-      openslide_read_associated_image(osr, name, S->thumbnail);
+      openslide_read_associated_image(S->osr, name, S->thumbnail);
     }
     associated_image_names++;
   }
@@ -49,12 +51,12 @@ void slideInit(OpenSlide *S, char *slide) {
   }
 }
 
-void slideGetTile(OpenSlide *S, uint32_t *buf, int l, int i, int j, int ts) {
+void slide_get_tile(slide_t *S, uint32_t *buf, int l, int i, int j, int ts) {
   openslide_read_region(S->osr, buf, i * ts, j * ts, l, ts, ts);
   assert(!openslide_get_error(S->osr));
 }
 
-void slideFree(OpenSlide *S) {
+void slide_free(slide_t *S) {
   openslide_close(S->osr);
 
   // Free only if thumbnail was already allocated

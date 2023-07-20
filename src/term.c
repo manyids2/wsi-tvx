@@ -11,48 +11,48 @@ void slice(const char *str, char *result, size_t start, size_t end) {
   strncpy(result, str + start, end - start);
 }
 
-void clearScreen(void) {
+void clear_screen(void) {
   if (write(STDOUT_FILENO, "\x1b[2J", 4) != 4)
     die("clearScreen");
 }
 
-void clearText(void) {
-  moveCursor(0, 0);
+void clear_text(void) {
+  move_cursor(0, 0);
   if (write(STDOUT_FILENO, "\x1b[0J\x1b[1J", 8) < 0)
     die("clearText");
 }
 
-void hideCursor(void) {
+void hide_cursor(void) {
   if (write(STDOUT_FILENO, "\x1b[?25l", 6) < 0)
     die("hideCursor");
 }
 
-void showCursor(void) {
+void show_cursor(void) {
   if (write(STDOUT_FILENO, "\x1b[?25h", 6) < 0)
     die("showCursor");
 }
 
-void moveCursor(int row, int col) {
+void move_cursor(int row, int col) {
   char s[32]; // giri giri
   int len = snprintf(s, sizeof(s), "\x1b[%d;%dH", row, col);
   if (write(STDOUT_FILENO, s, len) < 0)
     die("moveCursor");
 }
 
-void disableRawMode(void) {
+void term_disable_raw_mode(void) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
     die("tcsetattr");
 
   // reset and show cursor
-  clearScreen();
-  moveCursor(0, 0);
-  showCursor();
+  clear_screen();
+  move_cursor(0, 0);
+  show_cursor();
 }
 
-void enableRawMode(void) {
+void term_enable_raw_mode(void) {
   if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
     die("tcgetattr");
-  atexit(disableRawMode); // Then is always called on exit
+  atexit(term_disable_raw_mode); // Then is always called on exit
   struct termios raw = orig_termios;
   raw.c_iflag &= ~(ICRNL | IXON);
   raw.c_oflag &= ~(OPOST);
@@ -63,7 +63,7 @@ void enableRawMode(void) {
     die("tcsetattr");
 }
 
-int getWindowSize(int *rows, int *cols, int *vw, int *vh) {
+int get_window_size(int *rows, int *cols, int *vw, int *vh) {
   struct winsize ws;
   if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1)
     die("ioctl(fd, TIOCGWINSZ, &ws) failed.");
@@ -78,7 +78,7 @@ int getWindowSize(int *rows, int *cols, int *vw, int *vh) {
   return 0;
 }
 
-void getWindowSizeKitty(int *vw, int *vh) {
+void get_window_size_kitty(int *vw, int *vh) {
   // Read window size using kitty
   if (write(STDOUT_FILENO, "\x1b[14t", 5) < 0)
     die("getWindowSizeKitty");
@@ -89,7 +89,7 @@ void getWindowSizeKitty(int *vw, int *vh) {
   int p1 = -1;
   int p2 = -1;
   while (1) {
-    ch = getKeypress();
+    ch = get_keypress();
     str[n] = ch;
     if (ch == 't') {
       break;
@@ -109,7 +109,7 @@ void getWindowSizeKitty(int *vw, int *vh) {
   *vh = atoi(str_h);
 }
 
-int getKeypress(void) {
+int get_keypress(void) {
   int nread;
   char c;
   while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {

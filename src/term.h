@@ -11,15 +11,15 @@ enum viewerKey { ARROW_LEFT = 1000, ARROW_RIGHT, ARROW_UP, ARROW_DOWN };
 
 void die(const char *s);
 
-void disableRawMode(void);
-void enableRawMode(void);
+void term_disable_raw_mode(void);
+void term_enable_raw_mode(void);
 
-int getKeypress(void);
-int getWindowSize(int *rows, int *cols, int *vw, int *vh);
-void getWindowSizeKitty(int *vw, int *vh);
+int get_keypress(void);
+int get_window_size(int *rows, int *cols, int *vw, int *vh);
+void get_window_size_kitty(int *vw, int *vh);
 
-void clearScreen(void);
-void clearText(void);
-void hideCursor(void);
-void showCursor(void);
-void moveCursor(int row, int col);
+void clear_screen(void);
+void clear_text(void);
+void hide_cursor(void);
+void show_cursor(void);
+void move_cursor(int row, int col);

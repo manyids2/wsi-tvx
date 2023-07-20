@@ -20,6 +20,7 @@
 #define NUM_THREADS 64
 
 // ---  Errors  ---
+// DOUBT: why use do while?
 #define handle_error_en(en, msg)                                               \
   do {                                                                         \
     errno = en;                                                                \
@@ -33,5 +34,9 @@
     exit(EXIT_FAILURE);                                                        \
   } while (0)
 
-// ---  Write  ---
-
+// ---  Write, if unsuccessful, exit  ---
+#define write_or_die(s, len, msg)                                              \
+  if (write(STDOUT_FILENO, s, len) != len) {                                   \
+    perror(msg);                                                               \
+    exit(EXIT_FAILURE);                                                        \
+  }
