@@ -1,5 +1,9 @@
 #pragma once
 
+// --- Basics ---
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 // ---  Slide  ---
 #define MAX_LEVELS 32
 #define MAX_ASSOCIATED_IMAGES 8
@@ -20,6 +24,9 @@
 
 // --- Threads ---
 #define NUM_THREADS 64
+
+// --- Debug ---
+#define NUM_DEBUG 2
 
 // ---  Errors  ---
 // DOUBT: why use do while?

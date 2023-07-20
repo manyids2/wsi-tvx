@@ -2,23 +2,19 @@
 
 struct termios orig_termios;
 
-void clear_screen(void) { write_or_die("\x1b[2J", 4, "clear_screen"); }
-
 void clear_text(void) {
-  move_cursor(0, 0);
-  write_or_die("\x1b[0J\x1b[1J", 8, "clear_text");
+  write_or_die("\x1b[0;0H\x1b[0J\x1b[1J", 14, "clear_text");
 }
-
+void clear_screen(void) { write_or_die("\x1b[2J", 4, "clear_screen"); }
 void hide_cursor(void) { write_or_die("\x1b[?25l", 6, "hide_cursor"); }
 void show_cursor(void) { write_or_die("\x1b[?25h", 6, "show_cursor"); }
-
 void move_cursor(int row, int col) {
   char s[32];
   int len = snprintf(s, sizeof(s), "\x1b[%d;%dH", row, col);
   write_or_die(s, len, "move_cursor");
 }
 
-void term_disable_raw_mode(void) {
+void disable_raw_mode(void) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
     die("tcsetattr");
 
@@ -28,10 +24,10 @@ void term_disable_raw_mode(void) {
   show_cursor();
 }
 
-void term_enable_raw_mode(void) {
+void enable_raw_mode(void) {
   if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
     die("tcgetattr");
-  atexit(term_disable_raw_mode); // Then is always called on exit
+  atexit(disable_raw_mode); // Then is always called on exit
   struct termios raw = orig_termios;
   raw.c_iflag &= ~(ICRNL | IXON);
   raw.c_oflag &= ~(OPOST);

@@ -57,8 +57,19 @@ typedef struct pos_t {
 } pos_t;
 
 // ---  Threads  ---
-struct thread_info {
+typedef struct thread_info {
   pthread_t thread_id;
   int thread_num;
   tile_t *tile;
-};
+} thread_info;
+
+// -- Wrap it all up ---
+typedef struct app_t {
+  // data
+  world_t *world;
+  slide_t *slide;
+  view_t *view;
+  // ui
+  int debug;
+  char *statusline;
+} app_t;

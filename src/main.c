@@ -6,9 +6,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+// Initialize app
 slide_t slide;
 world_t world = {0};
 view_t view = {0};
+app_t app = {.slide = &slide, .world = &world, .view = &view, 0};
+
 ev_io stdin_watcher;
 
 static void stdin_cb(EV_P_ ev_io *w, int revents) {
@@ -17,7 +20,7 @@ static void stdin_cb(EV_P_ ev_io *w, int revents) {
     // but also waits for input if nothing is there,
     // which is probably redundant
     int c = get_keypress();
-    handle_keypress(EV_A_ w, c);
+    handle_keypress(EV_A_ w, &app, c);
   }
 }
 
@@ -28,7 +31,7 @@ int main(int argc, char **argv) {
   }
 
   // Usual terminal setup
-  term_enable_raw_mode();
+  enable_raw_mode();
   hide_cursor();
   clear_screen();
   move_cursor(0, 0);
@@ -51,6 +54,10 @@ int main(int argc, char **argv) {
   // Compute character dims
   world.cw = world.vw / world.cols;
   world.ch = world.vh / world.rows;
+
+  // IMPORTANT: Only after character dims are computed, impose view maxima
+  world.vw = MIN(world.vw, MAX_WIDTH);
+  world.vh = MIN(world.vh, MAX_HEIGHT);
 
   // Compute maximum level, cols and rows
   world.mlevel = slide.level_count - 1;
