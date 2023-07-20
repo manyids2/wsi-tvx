@@ -110,6 +110,7 @@ void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c) {
 
   // Toggle thumbnail
   case TOGGLE_THUMBNAIL:
+    app->thumb = !app->thumb;
     app->last_pressed = TOGGLE_THUMBNAIL;
     break;
 

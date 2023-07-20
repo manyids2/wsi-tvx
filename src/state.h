@@ -71,5 +71,6 @@ typedef struct app_t {
   view_t *view;
   // ui
   int debug;
+  int thumb;
   enum keys_e last_pressed;
 } app_t;
