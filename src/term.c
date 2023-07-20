@@ -38,7 +38,7 @@ void enable_raw_mode(void) {
     die("tcsetattr");
 }
 
-int get_window_size(int *rows, int *cols, int *vw, int *vh) {
+void get_window_size(int *rows, int *cols, int *vw, int *vh) {
   struct winsize ws;
   if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1)
     die("ioctl(fd, TIOCGWINSZ, &ws) failed.");
@@ -50,7 +50,6 @@ int get_window_size(int *rows, int *cols, int *vw, int *vh) {
   *rows = ws.ws_row;
   *vw = ws.ws_xpixel;
   *vh = ws.ws_ypixel;
-  return 0;
 }
 
 void get_window_size_kitty(int *vw, int *vh) {
@@ -62,9 +61,18 @@ void get_window_size_kitty(int *vw, int *vh) {
   int ch, n = 0;
   int p1 = -1;
   int p2 = -1;
-  while (1) {
-    ch = get_keypress();
+
+  // Read bytes one by one and parse
+  int nread;
+  while ((nread = read(STDIN_FILENO, &ch, 1)) != 1) {
+    // handle error
+    if (nread == -1 && errno != EAGAIN)
+      die("read");
+
+    // save char to string
     str[n] = ch;
+
+    // check break conditions
     if (ch == 't') {
       break;
     }
@@ -81,39 +89,4 @@ void get_window_size_kitty(int *vw, int *vh) {
   slice(str, str_w, p2 + 1, n);
   *vw = atoi(str_w);
   *vh = atoi(str_h);
-}
-
-int get_keypress(void) {
-  int nread;
-  char c;
-  while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
-    if (nread == -1 && errno != EAGAIN)
-      die("read");
-  }
-
-  if (c == '\x1b') {
-    char seq[3];
-
-    if (read(STDIN_FILENO, &seq[0], 1) != 1)
-      return '\x1b';
-    if (read(STDIN_FILENO, &seq[1], 1) != 1)
-      return '\x1b';
-
-    if (seq[0] == '[') {
-      switch (seq[1]) {
-      case 'A':
-        return ARROW_UP;
-      case 'B':
-        return ARROW_DOWN;
-      case 'C':
-        return ARROW_RIGHT;
-      case 'D':
-        return ARROW_LEFT;
-      }
-    }
-
-    return '\x1b';
-  } else {
-    return c;
-  }
 }

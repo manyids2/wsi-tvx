@@ -1,5 +1,17 @@
 #pragma once
 
+// --- Terminal ---
+enum keys_e {
+  ARROW_LEFT = 1000,
+  ARROW_RIGHT,
+  ARROW_UP,
+  ARROW_DOWN,
+  ZOOM_IN,
+  ZOOM_OUT,
+  TOGGLE_DEBUG,
+  TOGGLE_THUMBNAIL
+};
+
 // --- Basics ---
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
