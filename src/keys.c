@@ -3,7 +3,8 @@
 int get_keypress(void) {
   int nread;
   char c;
-  while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
+  // Read at least one char, else die
+  if ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
     if (nread == -1 && errno != EAGAIN)
       die("read");
   }
@@ -20,13 +21,13 @@ int get_keypress(void) {
     if (seq[0] == '[') {
       switch (seq[1]) {
       case 'A':
-        return ARROW_UP;
+        return MOVE_UP;
       case 'B':
-        return ARROW_DOWN;
+        return MOVE_DOWN;
       case 'C':
-        return ARROW_RIGHT;
+        return MOVE_RIGHT;
       case 'D':
-        return ARROW_LEFT;
+        return MOVE_LEFT;
       }
     }
 
@@ -37,6 +38,16 @@ int get_keypress(void) {
 
     // Handle single char
     switch (c) {
+    case 'q':
+      return QUIT;
+    case 'k':
+      return MOVE_UP;
+    case 'j':
+      return MOVE_DOWN;
+    case 'l':
+      return MOVE_RIGHT;
+    case 'h':
+      return MOVE_LEFT;
     case 'i':
       return ZOOM_IN;
     case 'o':
@@ -54,52 +65,48 @@ int get_keypress(void) {
 void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c) {
   switch (c) {
   // Quit
-  case 'q':
+  case QUIT:
   case (CTRL_KEY('q')):
     ev_io_stop(EV_A_ w);         // Stop watching stdin
     ev_break(EV_A_ EVBREAK_ALL); // all nested ev_runs stop iterating
     break;
 
   // Up
-  case ARROW_DOWN:
-  case 'j':
+  case MOVE_DOWN:
     // viewMoveDown(A.V);
     break;
 
   // Down
-  case ARROW_UP:
-  case 'k':
+  case MOVE_UP:
     // viewMoveUp(A.V);
     break;
 
   // Left
-  case ARROW_LEFT:
-  case 'h':
+  case MOVE_LEFT:
     // viewMoveLeft(A.V);
     break;
 
   // Right
-  case ARROW_RIGHT:
-  case 'l':
+  case MOVE_RIGHT:
     // viewMoveRight(A.V);
     break;
 
   // Zoom in
-  case 'i':
+  case ZOOM_IN:
     // viewZoomIn(A.V);
     break;
 
   // Zoom out
-  case 'o':
+  case ZOOM_OUT:
     // viewZoomOut(A.V);
     break;
 
   // Toggle thumbnail
-  case 't':
+  case TOGGLE_THUMBNAIL:
     break;
 
   // Debug info
-  case 'd':
+  case TOGGLE_DEBUG:
     app->debug = (app->debug + 1) % NUM_DEBUG; // loop through debug modes
     break;
 

@@ -2,10 +2,11 @@
 
 // --- Terminal ---
 enum keys_e {
-  ARROW_LEFT = 1000,
-  ARROW_RIGHT,
-  ARROW_UP,
-  ARROW_DOWN,
+  QUIT = 1000,
+  MOVE_LEFT,
+  MOVE_RIGHT,
+  MOVE_UP,
+  MOVE_DOWN,
   ZOOM_IN,
   ZOOM_OUT,
   TOGGLE_DEBUG,

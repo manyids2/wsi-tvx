@@ -1,5 +1,5 @@
-#include "term.h"
 #include "state.h"
+#include "term.h"
 #include <ev.h>
 
 int get_keypress(void);

@@ -15,9 +15,7 @@ ev_io stdin_watcher;
 
 static void stdin_cb(EV_P_ ev_io *w, int revents) {
   if (revents & EV_READ) {
-    // NOTE: reads STDIN,
-    // but also waits for input if nothing is there,
-    // which is probably redundant
+    // NOTE: Expects at least one byte ( reads upto 3 )
     int c = get_keypress();
     handle_keypress(EV_A_ w, &app, c);
   }
@@ -36,6 +34,7 @@ int main(int argc, char **argv) {
   char *slidepath = argv[1];
   printf("slidepath: %s\r\n", slidepath);
 
+  // Initialize slide, world, view
   app_init(&app, slidepath);
 
   // Start the event loop
