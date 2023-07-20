@@ -17,11 +17,13 @@ typedef struct World {
 
 // Remains constant upto level change or move
 typedef struct View {
-  int level, left, top; // wrt slide at level
-  float downsample;    // downsample factor from max zoom
-  int64_t sw, sh;       // Slide level dims
-  int64_t sx, sy;       // Slide level position
-  int64_t wx, wy;       // World level position
+  int level;        // Level of slide
+  int left, top;    // Coords wrt slide
+  int coi, coj;     // Cache offset to view
+  float downsample; // downsample factor from max zoom
+  int64_t sw, sh;   // Slide level dims
+  int64_t sx, sy;   // Slide level position
+  int64_t wx, wy;   // World level position
 } View;
 
 // Tile from slide ( params for load image )
@@ -40,10 +42,12 @@ typedef struct Position {
 } Position;
 
 // ---  Threads  ---
-
-// From example program
 struct thread_info {
   pthread_t thread_id;
   int thread_num;
-  char *argv_string;
+  int *l;          // level
+  int *si;         // xth coord wrt slide
+  int *sj;         // yth coord wrt slide
+  uint32_t *buf;   // buffer for openslide
+  uint32_t *buf64; // buffer for kitty
 };
