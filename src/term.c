@@ -1,4 +1,5 @@
 #include "term.h"
+#include <stdio.h>
 
 struct termios orig_termios;
 
@@ -57,7 +58,7 @@ void get_window_size_kitty(int *vw, int *vh) {
   write_or_die("\x1b[14t", 5, "get_window_size_kitty");
 
   // Read response
-  char str[16];
+  char str[32];
   int ch, n = 0;
   int p1 = -1;
   int p2 = -1;

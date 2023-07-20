@@ -16,6 +16,10 @@ void app_init(app_t *app, char *slidepath) {
   // Start at minimum zoom
   int level = app->world->mlevel;
   setup_view(app, level);
+
+  // Draw basics
+  app_draw_statusline(app);
+  app_debug_world(app);
 }
 
 void setup_slide(slide_t *slide, char *slidepath) {
@@ -35,7 +39,7 @@ void setup_world(app_t *app) {
 
   // Query using IOCTL first, then kitty
   get_window_size(rows, cols, vw, vh);
-  get_window_size_kitty(vw, vh);
+  // get_window_size_kitty(vw, vh);
 
   // Compute character dims
   world->cw = world->vw / world->cols;

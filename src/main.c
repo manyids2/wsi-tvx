@@ -43,9 +43,6 @@ int main(int argc, char **argv) {
   // Initialize slide, world, view
   app_init(&app, slidepath);
 
-  // Make sure there is nothing on stdin
-  fflush(STDIN_FILENO);
-
   // Start the event loop
   struct ev_loop *loop = EV_DEFAULT;
 
