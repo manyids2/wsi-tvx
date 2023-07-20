@@ -1,6 +1,6 @@
 #include "keys.h"
 
-int get_keypress(void) {
+int parse_input(void) {
   int nread;
   char c;
   // Read at least one char, else die

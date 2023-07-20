@@ -16,8 +16,6 @@ void app_init(app_t *app, char *slidepath) {
   // Start at minimum zoom
   int level = app->world->mlevel;
   setup_view(app, level);
-
-  app->last_pressed = INIT;
 }
 
 void setup_slide(slide_t *slide, char *slidepath) {
@@ -51,6 +49,10 @@ void setup_world(app_t *app) {
   world->mlevel = slide->level_count - 1;
   world->vmi = world->vw / TILE_SIZE;
   world->vmj = world->vh / TILE_SIZE;
+
+  // Get world dims from slide
+  world->ww = slide->level_w[slide->level_count - 1];
+  world->wh = slide->level_h[slide->level_count - 1];
 }
 
 void setup_view(app_t *app, int level) {
@@ -76,6 +78,27 @@ void app_draw_statusline(app_t *app) {
 
   move_cursor(app->world->rows - 1, 1);
   write_or_die(s, len, "app_draw_statusline");
+}
+
+void app_debug_world(app_t *app) {
+  world_t *world = app->world;
+  char s[1024];
+  int len = snprintf(s, sizeof(s),
+                     "World:          \r\n"
+                     " rows, cols: %6d, %6d   \r\n"
+                     "   ww,   wh: %6ld, %6ld \r\n"
+                     "   vw,   vh: %6d, %6d   \r\n"
+                     "   cw,   ch: %6d, %6d   \r\n"
+                     "   ox,   oy: %6d, %6d   \r\n"
+                     "  vmi,  vmj: %6d, %6d   \r\n"
+                     "     mlevel: %6d        \r\n"
+                     "\r\n",
+                     world->rows, world->cols, world->ww, world->wh, world->vw,
+                     world->vh, world->cw, world->ch, world->ox, world->oy,
+                     world->vmi, world->vmj, world->mlevel);
+
+  move_cursor(3, 0);
+  write_or_die(s, len, "app_get_debug_world");
 }
 
 void app_free(app_t *app) {

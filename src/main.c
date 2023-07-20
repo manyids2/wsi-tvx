@@ -20,9 +20,10 @@ ev_io stdin_watcher;
 static void stdin_cb(EV_P_ ev_io *w, int revents) {
   if (revents & EV_READ) {
     // NOTE: Expects at least one byte ( reads upto 3 )
-    int c = get_keypress();
+    int c = parse_input();
     handle_keypress(EV_A_ w, &app, c);
     app_draw_statusline(&app);
+    app_debug_world(&app);
   }
 }
 
@@ -41,6 +42,9 @@ int main(int argc, char **argv) {
 
   // Initialize slide, world, view
   app_init(&app, slidepath);
+
+  // Make sure there is nothing on stdin
+  fflush(STDIN_FILENO);
 
   // Start the event loop
   struct ev_loop *loop = EV_DEFAULT;
