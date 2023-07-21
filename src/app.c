@@ -61,39 +61,13 @@ void setup_world(app_t *app) {
 }
 
 void setup_view(app_t *app, int level) {
-  slide_t *slide = app->slide;
   world_t *world = app->world;
-  view_t *view = app->view;
 
-  // Choose starting position at center of level
-  view->level = level;
-  view->zoom = slide->downsamples[view->level];
-
-  // Get size of slide at level
-  view->sw = slide->level_w[level];
-  view->sh = slide->level_h[level];
-
-  // Compute maximum tiles
-  view->smi = (int)ceil((double)view->sw / TILE_SIZE);
-  view->smj = (int)ceil((double)view->sh / TILE_SIZE);
+  // Set proper level
+  view_update_level(app, level);
 
   // Center on center of slide
-  view->wx = world->ww / 2;
-  view->wy = world->wh / 2;
-  app_set_slide_from_worldxy(app);
-}
-
-void app_set_slide_from_worldxy(app_t *app) {
-  view_t *view = app->view;
-  world_t *world = app->world;
-
-  // Compute corresponding slide position at level
-  view->sx = view->wx / view->zoom;
-  view->sy = view->wy / view->zoom;
-
-  // Compute left top from center
-  view->left = (int)(view->sx - (world->vw / 2)) / TILE_SIZE;
-  view->top = (int)(view->sy - (world->vh / 2)) / TILE_SIZE;
+  view_update_worldxy(app, world->ww / 2, world->wh / 2);
 }
 
 void app_draw_statusline(app_t *app) {
@@ -101,11 +75,15 @@ void app_draw_statusline(app_t *app) {
   world_t *world = app->world;
   view_t *view = app->view;
   char s[256];
-  int len = snprintf(s, sizeof(s), " %s  |   %d / %d | ⇱  %d, %d",
-                     slide->slidepath, view->level, world->mlevel, view->left,
-                     view->top);
+  int len;
 
-  move_cursor(app->world->rows - 1, 1);
+  len = snprintf(s, world->cols, "  %s", slide->slidepath);
+  move_cursor(app->world->rows - 2, world->cols - len);
+  write_or_die(s, len, "app_draw_statusline");
+
+  len = snprintf(s, world->cols, "   %d / %d | ⇱  %d, %d", view->level,
+                 world->mlevel, view->left, view->top);
+  move_cursor(app->world->rows - 1, world->cols - len);
   write_or_die(s, len, "app_draw_statusline");
 }
 

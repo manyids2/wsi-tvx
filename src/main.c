@@ -22,6 +22,7 @@ static void stdin_cb(EV_P_ ev_io *w, int revents) {
     // NOTE: Expects at least one byte ( reads upto 3 )
     int c = parse_input();
     handle_keypress(EV_A_ w, &app, c);
+    clear_text();
     app_draw_statusline(&app);
     app_draw_debug(&app);
   }

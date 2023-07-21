@@ -1,4 +1,5 @@
 #include "keys.h"
+#include "view.h"
 
 int parse_input(void) {
   int nread;
@@ -73,55 +74,104 @@ void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c) {
     break;
 
   // Up
-  case MOVE_DOWN:
-    // viewMoveDown(A.V);
-    app->last_pressed = MOVE_DOWN;
+  case MOVE_UP:
+    move_up(app);
     break;
 
   // Down
-  case MOVE_UP:
-    // viewMoveUp(A.V);
-    app->last_pressed = MOVE_UP;
+  case MOVE_DOWN:
+    move_down(app);
     break;
 
   // Left
   case MOVE_LEFT:
-    // viewMoveLeft(A.V);
-    app->last_pressed = MOVE_LEFT;
+    move_left(app);
     break;
 
   // Right
   case MOVE_RIGHT:
-    // viewMoveRight(A.V);
-    app->last_pressed = MOVE_RIGHT;
+    move_right(app);
     break;
 
   // Zoom in
   case ZOOM_IN:
-    // viewZoomIn(A.V);
-    app->last_pressed = ZOOM_IN;
+    zoom_in(app);
     break;
 
   // Zoom out
   case ZOOM_OUT:
-    // viewZoomOut(A.V);
-    app->last_pressed = ZOOM_OUT;
+    zoom_out(app);
     break;
 
   // Toggle thumbnail
   case TOGGLE_THUMBNAIL:
-    app->thumb = !app->thumb;
-    app->last_pressed = TOGGLE_THUMBNAIL;
+    toggle_thumbnail(app);
     break;
 
   // Debug info
   case TOGGLE_DEBUG:
-    app->debug = (app->debug + 1) % NUM_DEBUG; // loop through debug modes
-    app->last_pressed = TOGGLE_DEBUG;
+    toggle_debug(app);
     break;
 
   default:
     app->last_pressed = INIT;
     break;
   }
+}
+
+void move_left(app_t *app) {
+  view_t *view = app->view;
+  int left = MAX(0, view->left - 1);
+  view_update_left_top(app, left, view->top);
+  app->last_pressed = MOVE_LEFT;
+}
+
+void move_right(app_t *app) {
+  view_t *view = app->view;
+  world_t *world = app->world;
+  int left = MIN(view->smi - world->vmi, view->left + 1);
+  view_update_left_top(app, left, view->top);
+  app->last_pressed = MOVE_RIGHT;
+}
+
+void move_up(app_t *app) {
+  view_t *view = app->view;
+  int top = MAX(0, view->top - 1);
+  view_update_left_top(app, view->left, top);
+  app->last_pressed = MOVE_UP;
+}
+
+void move_down(app_t *app) {
+  view_t *view = app->view;
+  world_t *world = app->world;
+  int top = MIN(view->smj - world->vmj, view->top + 1);
+  view_update_left_top(app, view->left, top);
+  app->last_pressed = MOVE_DOWN;
+}
+
+void zoom_in(app_t *app) {
+  view_t *view = app->view;
+  int level = MAX(0, view->level - 1);
+  view_update_level(app, level);
+  view_update_worldxy(app, view->wx, view->wy);
+  app->last_pressed = ZOOM_IN;
+}
+
+void zoom_out(app_t *app) {
+  view_t *view = app->view;
+  world_t *world = app->world;
+  int level = MIN(world->mlevel, view->level + 1);
+  view_update_level(app, level);
+  view_update_worldxy(app, view->wx, view->wy);
+  app->last_pressed = ZOOM_OUT;
+}
+
+void toggle_thumbnail(app_t *app) {
+  app->thumb = !app->thumb;
+  app->last_pressed = TOGGLE_THUMBNAIL;
+}
+
+void toggle_debug(app_t *app) {
+  app->debug = (app->debug + 1) % NUM_DEBUG; // loop through debug modes
+  app->last_pressed = TOGGLE_DEBUG;
 }
