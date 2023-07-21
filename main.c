@@ -1,5 +1,5 @@
-#include "app.h"
-#include "keys.h"
+#include "src/app.h"
+#include "src/keys.h"
 #include <ev.h>
 #include <stdio.h>
 #include <stdlib.h>
