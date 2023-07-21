@@ -20,6 +20,9 @@ void app_init(app_t *app, char *slidepath) {
                (int)(app->world->vh * slide->downsamples[level] / 2);
   setup_view(app, level, wx, wy);
 
+  // Tiles, including loading them
+  setup_tiles(app);
+
   // Draw statusline
   app_draw_statusline(app);
 }
@@ -74,6 +77,7 @@ void setup_view(app_t *app, int level, int64_t wx, int64_t wy) {
 void setup_tiles(app_t *app) {
   tiles_t *tiles = app->tiles;
   tiles_init(tiles);
+  tiles->osr = app->slide->osr;
 }
 
 void app_draw_statusline(app_t *app) {
@@ -87,7 +91,7 @@ void app_draw_statusline(app_t *app) {
   move_cursor(0, 0);
   write_or_die(s, len, "app_draw_statusline");
 
-  len = snprintf(s, world->cols, "   %d / %d | ⇱  %3d, %3d", view->level,
+  len = snprintf(s, world->cols, "   %d / %d | %3d, %3d  ⇱ ", view->level,
                  world->mlevel, view->left, view->top);
   move_cursor(app->world->rows - 1, world->cols - len);
   write_or_die(s, len, "app_draw_statusline");
@@ -151,6 +155,6 @@ void app_draw_debug(app_t *app) {
 void app_free(app_t *app) {
   slide_t *slide = app->slide;
   tiles_t *tiles = app->tiles;
-  slide_free(slide);
   tiles_free(tiles);
+  slide_free(slide);
 }

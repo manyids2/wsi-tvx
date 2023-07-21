@@ -59,15 +59,15 @@ typedef struct tile_t {
 } tile_t;
 
 typedef struct tiles_t {
+  openslide_t *osr; // Reference to slide to it can load tiles
   pthread_mutex_t *mutex;
-  int current_up;                   // ring buffer - should double as lru
-  int current_mid;                  //   make for each layer
-  int current_down;                 //     up, mid, down
-  view_t up;                        // Record state for all levels
-  view_t mid;                       // as we need them
-  view_t down;                      // for cache
-  tile_t tiles[MAX_TILE_CACHE];     // Loaded tiles and kitty_id
-  int visible[MAX_COLS * MAX_ROWS]; // indices of visible tiles
+  view_t up;                                 // Record state for all levels
+  view_t mid;                                // as we need them
+  view_t down;                               // for cache
+  tile_t tiles[MAX_TILE_CACHE];              // Loaded tiles and kitty_id
+  int visible[MAX_COLS * MAX_ROWS];          // indices of visible tiles
+  uint32_t buf[TILE_SIZE * TILE_SIZE];       // Buffer for openslide
+  char buf64[TILE_SIZE * TILE_SIZE * 4 + 1]; // Buffer for kitty
 } tiles_t;
 
 typedef struct thread_info {

@@ -48,6 +48,10 @@ int main(int argc, char **argv) {
   // Initialize slide, world, view
   app_init(&app, slidepath);
 
+  // Test load
+  uint32_t kitty_id = tile_load(app.tiles, 0, 0, 0);
+  tile_display(kitty_id, 5, 5, 0, 0, 10);
+
   // Start the event loop
   struct ev_loop *loop = EV_DEFAULT;
 

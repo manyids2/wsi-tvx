@@ -42,6 +42,7 @@ typedef enum {
   }
 
 // --- Terminal ---
+#define CHUNK 4096
 enum keys_e {
   INIT = 0,
   TOGGLE_THUMBNAIL = 1,
