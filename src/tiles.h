@@ -17,3 +17,5 @@ void tile_provision(uint32_t kitty_id, int w, int h, char *buf64);
 void tile_display(uint32_t kitty_id, int row, int col, int X, int Y, int Z);
 void tile_clear(uint32_t kitty_id);
 void tile_delete(uint32_t kitty_id);
+
+void kittyProvisionImage(int index, int w, int h, char *buf64);

@@ -1,10 +1,12 @@
 #include "tiles.h"
 #include "constants.h"
+#include "term.h"
 
 void tiles_init(tiles_t *tiles) {
   tiles->mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
   if (pthread_mutex_init(tiles->mutex, NULL))
     die("LRU Cache unable to initialise mutex");
+  tiles->current = 0;
 }
 
 void tiles_free(tiles_t *tiles) {
@@ -17,7 +19,7 @@ void tiles_free(tiles_t *tiles) {
 
 void tiles_clear(tiles_t *tiles) {
   for (int i = 0; i < MAX_TILE_CACHE; i++) {
-    if (tiles->tiles[i].kitty_id >= 0) {
+    if (tiles->tiles[i].kitty_id > KITTY_ID_OFFSET) {
       tile_clear(tiles->tiles[i].kitty_id);
     }
   }
@@ -35,6 +37,8 @@ void tiles_load_view(tiles_t *tiles, view_t *view, world_t *world) {
   int index, si, sj;
   for (int i = 0; i < vmi; i++) {
     for (int j = 0; j < vmj; j++) {
+      pos_t pos = world->pos[i * vmj + j];
+
       // Checks if loaded, else loads
       si = i + left;
       sj = j + top;
@@ -42,8 +46,8 @@ void tiles_load_view(tiles_t *tiles, view_t *view, world_t *world) {
       if (index == -1)
         index = tile_load(tiles, level, si, sj);
 
+      // Get kitty id and display in grid
       uint32_t kitty_id = tiles->tiles[index].kitty_id;
-      pos_t pos = world->pos[i * vmj + j];
       tile_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
     }
   }
@@ -54,12 +58,11 @@ int tile_get(tiles_t *tiles, int level, int left, int top) {
   tile_t tile;
   for (int index = 0; index < MAX_TILE_CACHE; index++) {
     tile = tiles->tiles[index];
-    if (tile.kitty_id > 0) {
-      if ((tile.level == level) && (tile.si == left) && (tile.sj == top)) {
-        // Already loaded, so return index
-        tile.freq += 1;
-        return index;
-      }
+    if ((tile.kitty_id > 0) && (tile.level == level) && (tile.si == left) &&
+        (tile.sj == top)) {
+      // Already loaded, so return index
+      tile.freq += 1;
+      return index;
     }
   }
   return -1;
@@ -83,10 +86,11 @@ int tile_load(tiles_t *tiles, int level, int left, int top) {
   RGBAtoRGBbase64(TILE_SIZE * TILE_SIZE, tiles->buf, tiles->buf64);
 
   // Send to kitty
-  tile_provision(current + KITTY_ID_OFFSET, TILE_SIZE, TILE_SIZE, tiles->buf64);
+  uint32_t kitty_id = current + KITTY_ID_OFFSET;
+  kittyProvisionImage(kitty_id, TILE_SIZE, TILE_SIZE, tiles->buf64);
 
   // Register tile
-  tiles->tiles[current].kitty_id = current + KITTY_ID_OFFSET;
+  tiles->tiles[current].kitty_id = kitty_id;
   tiles->tiles[current].level = level;
   tiles->tiles[current].si = left;
   tiles->tiles[current].sj = top;
@@ -96,7 +100,7 @@ int tile_load(tiles_t *tiles, int level, int left, int top) {
   return current;
 }
 
-void tile_provision(uint32_t kitty_id, int w, int h, char *buf64) {
+void kittyProvisionImage(int index, int w, int h, char *buf64) {
   /*
    * Switch to RGB to get gains on base64 encoding
    *
@@ -111,11 +115,36 @@ void tile_provision(uint32_t kitty_id, int w, int h, char *buf64) {
         base64_size - sent_bytes < CHUNK ? base64_size - sent_bytes : CHUNK;
     int cont = !!(sent_bytes + chunk_size < base64_size);
     if (sent_bytes == 0) {
-      fprintf(stdout, "\x1B_Gt=d,f=24,q=2,i=%u,s=%d,v=%d,m=%d%s;", kitty_id, w,
-              h, cont, "");
+      fprintf(stdout, "\x1B_Gt=d,f=24,q=2,i=%u,s=%d,v=%d,m=%d%s;", index, w, h,
+              cont, "");
     } else {
       fprintf(stdout, "\x1B_Gm=%d;", cont);
     }
+    fwrite(buf64 + sent_bytes, chunk_size, 1, stdout);
+    fprintf(stdout, "\x1B\\");
+    sent_bytes += chunk_size;
+  }
+  fflush(stdout);
+}
+
+void tile_provision(uint32_t kitty_id, int w, int h, char *buf64) {
+  /*
+   * Switch to RGB to get gains on base64 encoding
+   *
+   * <ESC>_Gf=24,s=<w>,v=<h>,m=1;<encoded pixel data first chunk><ESC>\
+   * <ESC>_Gm=1;<encoded pixel data second chunk><ESC>\
+   * <ESC>_Gm=0;<encoded pixel data last chunk><ESC>\
+   */
+  size_t sent_bytes = 0;
+  size_t base64_size = w * h * sizeof(uint32_t);
+
+  fprintf(stdout, "\x1B_Gt=d,f=24,q=2,i=%u,s=%d,v=%d,m=1;", kitty_id, w, h);
+  while (sent_bytes < base64_size) {
+    size_t chunk_size =
+        base64_size - sent_bytes < CHUNK ? base64_size - sent_bytes : CHUNK;
+    int cont = !!(sent_bytes + chunk_size < base64_size);
+    if (sent_bytes > 0)
+      fprintf(stdout, "\x1B_Gm=%d;", cont);
     fwrite(buf64 + sent_bytes, chunk_size, 1, stdout);
     fprintf(stdout, "\x1B\\");
     sent_bytes += chunk_size;

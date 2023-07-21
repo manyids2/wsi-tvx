@@ -5,8 +5,8 @@
 int parse_input(void) {
   int nread;
   char c;
-  // Read at least one char, else die
-  if ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
+  // Read at least one char, else wait for input
+  while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
     if (nread == -1 && errno != EAGAIN)
       die("read");
   }
@@ -64,14 +64,13 @@ int parse_input(void) {
   }
 }
 
-void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c) {
+void handle_keypress(app_t *app, int c) {
   switch (c) {
   // Quit
   case QUIT:
   case (CTRL_KEY('q')):
-    ev_io_stop(EV_A_ w);         // Stop watching stdin
-    ev_break(EV_A_ EVBREAK_ALL); // all nested ev_runs stop iterating
     app->last_pressed = QUIT;
+    exit(EXIT_SUCCESS);
     break;
 
   // Up
@@ -123,39 +122,49 @@ void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c) {
 void move_left(app_t *app) {
   app->last_pressed = MOVE_LEFT;
   view_t *view = app->view;
+  world_t *world = app->world;
+  tiles_t *tiles = app->tiles;
   int left = MAX(0, view->left - 1);
   if (left == view->left)
     return;
   view_update_left_top(view, left, view->top);
+  tiles_load_view(tiles, view, world);
 }
 
 void move_right(app_t *app) {
   app->last_pressed = MOVE_RIGHT;
   view_t *view = app->view;
   world_t *world = app->world;
+  tiles_t *tiles = app->tiles;
   int left = MIN(view->smi - world->vmi, view->left + 1);
   if (left == view->left)
     return;
   view_update_left_top(view, left, view->top);
+  tiles_load_view(tiles, view, world);
 }
 
 void move_up(app_t *app) {
   app->last_pressed = MOVE_UP;
   view_t *view = app->view;
+  world_t *world = app->world;
+  tiles_t *tiles = app->tiles;
   int top = MAX(0, view->top - 1);
   if (top == view->top)
     return;
   view_update_left_top(view, view->left, top);
+  tiles_load_view(tiles, view, world);
 }
 
 void move_down(app_t *app) {
   app->last_pressed = MOVE_DOWN;
   view_t *view = app->view;
   world_t *world = app->world;
+  tiles_t *tiles = app->tiles;
   int top = MIN(view->smj - world->vmj, view->top + 1);
   if (top == view->top)
     return;
   view_update_left_top(view, view->left, top);
+  tiles_load_view(tiles, view, world);
 }
 
 void zoom_in(app_t *app) {

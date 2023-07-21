@@ -17,21 +17,6 @@ app_t app = {.slide = &slide,
              .debug = DEBUG_NONE,
              .last_pressed = INIT};
 
-ev_io stdin_watcher;
-
-static void stdin_cb(EV_P_ ev_io *w, int revents) {
-  if (revents & EV_READ) {
-    // NOTE: Expects at least one byte ( reads upto 3 )
-    int c = parse_input();
-    handle_keypress(EV_A_ w, &app, c);
-
-    // Render info
-    clear_text();
-    app_draw_statusline(&app);
-    app_draw_debug(&app);
-  }
-}
-
 int main(int argc, char **argv) {
   if (argc != 2) {
     printf("Usage: wsi-tvx path/to/slide \n");
@@ -48,19 +33,16 @@ int main(int argc, char **argv) {
   // Initialize slide, world, view
   app_init(&app, slidepath);
 
-  // Test load
-  uint32_t kitty_id = tile_get(app.tiles, 0, 0, 0);
-  tile_display(kitty_id, 5, 5, 0, 0, 10);
+  while (1) {
+    int c = parse_input();
+    clear_text();
 
-  // Start the event loop
-  struct ev_loop *loop = EV_DEFAULT;
+    handle_keypress(&app, c);
 
-  // Watch stdin
-  ev_io_init(&stdin_watcher, stdin_cb, STDIN_FILENO, EV_READ);
-  ev_io_start(loop, &stdin_watcher);
-
-  // Now wait for events to arrive
-  ev_run(loop, 0);
+    // Render info
+    app_draw_statusline(&app);
+    app_draw_debug(&app);
+  }
 
   // Free memory
   app_free(&app);

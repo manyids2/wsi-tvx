@@ -1,9 +1,8 @@
 #include "state.h"
 #include "term.h"
-#include <ev.h>
 
 int parse_input(void);
-void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c);
+void handle_keypress(app_t *app, int c);
 
 void move_left(app_t *app);
 void move_right(app_t *app);
