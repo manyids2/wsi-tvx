@@ -78,7 +78,7 @@ void app_draw_statusline(app_t *app) {
   int len;
 
   len = snprintf(s, world->cols, "  %s", slide->slidepath);
-  move_cursor(app->world->rows - 2, world->cols - len);
+  move_cursor(0, 0);
   write_or_die(s, len, "app_draw_statusline");
 
   len = snprintf(s, world->cols, "   %d / %d | ⇱  %d, %d", view->level,
@@ -87,7 +87,7 @@ void app_draw_statusline(app_t *app) {
   write_or_die(s, len, "app_draw_statusline");
 }
 
-void app_draw_debug(app_t *app) {
+void app_draw_debug_state(app_t *app) {
   slide_t *slide = app->slide;
   world_t *world = app->world;
   view_t *view = app->view;
@@ -135,6 +135,12 @@ void app_draw_debug(app_t *app) {
       view->oj, app->debug, app->thumb, app->last_pressed);
   move_cursor(0, 0);
   write_or_die(s, len, "app_get_debug_world");
+}
+
+void app_draw_debug(app_t *app) {
+  if (app->debug == DEBUG_STATE) {
+    app_draw_debug_state(app);
+  }
 }
 
 void app_free(app_t *app) {

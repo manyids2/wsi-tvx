@@ -1,23 +1,5 @@
 #pragma once
 
-// --- Terminal ---
-enum keys_e {
-  INIT = 0,
-  TOGGLE_THUMBNAIL = 1,
-  MOVE_LEFT = 2,
-  MOVE_RIGHT = 3,
-  MOVE_UP = 4,
-  MOVE_DOWN = 5,
-  ZOOM_IN = 6,
-  ZOOM_OUT = 7,
-  TOGGLE_DEBUG = 8,
-  QUIT = 9,
-};
-
-// --- Basics ---
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-
 // ---  Slide  ---
 #define MAX_PATH_LENGTH 1024
 #define MAX_LEVELS 32
@@ -40,8 +22,31 @@ enum keys_e {
 // --- Threads ---
 #define NUM_THREADS 64
 
+// --- Terminal ---
+enum keys_e {
+  INIT = 0,
+  TOGGLE_THUMBNAIL = 1,
+  MOVE_LEFT = 2,
+  MOVE_RIGHT = 3,
+  MOVE_UP = 4,
+  MOVE_DOWN = 5,
+  ZOOM_IN = 6,
+  ZOOM_OUT = 7,
+  TOGGLE_DEBUG = 8,
+  QUIT = 9,
+};
+
 // --- Debug ---
-#define NUM_DEBUG 2
+enum debug_e {
+  DEBUG_NONE = 1,
+  DEBUG_STATE = 2,
+  DEBUG_TILES = 3,
+};
+#define NUM_DEBUG 3
+
+// --- Basics ---
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 // ---  Errors  ---
 // DOUBT: why use do while?
