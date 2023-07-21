@@ -125,7 +125,7 @@ void move_left(app_t *app) {
   int left = MAX(0, view->left - 1);
   if (left == view->left)
     return;
-  view_update_left_top(app, left, view->top);
+  view_update_left_top(view, left, view->top);
 }
 
 void move_right(app_t *app) {
@@ -135,7 +135,7 @@ void move_right(app_t *app) {
   int left = MIN(view->smi - world->vmi, view->left + 1);
   if (left == view->left)
     return;
-  view_update_left_top(app, left, view->top);
+  view_update_left_top(view, left, view->top);
 }
 
 void move_up(app_t *app) {
@@ -144,7 +144,7 @@ void move_up(app_t *app) {
   int top = MAX(0, view->top - 1);
   if (top == view->top)
     return;
-  view_update_left_top(app, view->left, top);
+  view_update_left_top(view, view->left, top);
 }
 
 void move_down(app_t *app) {
@@ -154,28 +154,30 @@ void move_down(app_t *app) {
   int top = MIN(view->smj - world->vmj, view->top + 1);
   if (top == view->top)
     return;
-  view_update_left_top(app, view->left, top);
+  view_update_left_top(view, view->left, top);
 }
 
 void zoom_in(app_t *app) {
   app->last_pressed = ZOOM_IN;
   view_t *view = app->view;
+  slide_t *slide = app->slide;
   int level = MAX(0, view->level - 1);
   if (level == view->level)
     return;
-  view_update_level(app, level);
-  view_update_worldxy(app, view->wx, view->wy);
+  view_update_level(view, slide, level);
+  view_set_wx_wy(view, view->wx, view->wy);
 }
 
 void zoom_out(app_t *app) {
   app->last_pressed = ZOOM_OUT;
   view_t *view = app->view;
+  slide_t *slide = app->slide;
   world_t *world = app->world;
   int level = MIN(world->mlevel, view->level + 1);
   if (level == view->level)
     return;
-  view_update_level(app, level);
-  view_update_worldxy(app, view->wx, view->wy);
+  view_update_level(view, slide, level);
+  view_set_wx_wy(view, view->wx, view->wy);
 }
 
 void toggle_thumbnail(app_t *app) {

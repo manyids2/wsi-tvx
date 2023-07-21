@@ -67,11 +67,14 @@ void setup_world(app_t *app) {
 }
 
 void setup_view(app_t *app, int level, int64_t wx, int64_t wy) {
+  view_t *view = app->view;
+  slide_t *slide = app->slide;
+
   // Set proper level
-  view_update_level(app, level);
+  view_update_level(view, slide, level);
 
   // Center on center of slide
-  view_update_worldxy(app, wx, wy);
+  view_set_wx_wy(view, wx, wy);
 }
 
 void setup_tiles(app_t *app) {

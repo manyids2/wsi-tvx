@@ -1,9 +1,6 @@
 #include "view.h"
 
-void view_update_level(app_t *app, int level) {
-  slide_t *slide = app->slide;
-  view_t *view = app->view;
-
+void view_update_level(view_t *view, slide_t *slide, int level) {
   // Set view according to level
   view->level = level;
   view->zoom = slide->downsamples[view->level];
@@ -17,9 +14,7 @@ void view_update_level(app_t *app, int level) {
   view->smj = (int)ceil((double)view->sh / TILE_SIZE);
 }
 
-void view_update_worldxy(app_t *app, int wx, int wy) {
-  view_t *view = app->view;
-
+void view_set_wx_wy(view_t *view, int wx, int wy) {
   // Compute corresponding slide position at level
   double sx, sy;
   sx = (double)wx / view->zoom;
@@ -29,12 +24,10 @@ void view_update_worldxy(app_t *app, int wx, int wy) {
   int left, top;
   left = (int)ceil(sx / TILE_SIZE);
   top = (int)ceil(sy / TILE_SIZE);
-
-  view_update_left_top(app, left, top);
+  view_update_left_top(view, left, top);
 }
 
-void view_update_left_top(app_t *app, int left, int top) {
-  view_t *view = app->view;
+void view_update_left_top(view_t *view, int left, int top) {
   view->left = left;
   view->top = top;
 
