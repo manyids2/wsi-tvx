@@ -9,9 +9,11 @@
 slide_t slide = {0};
 world_t world = {0};
 view_t view = {0};
+tiles_t tiles = {0};
 app_t app = {.slide = &slide,
              .world = &world,
              .view = &view,
+             .tiles = &tiles,
              .debug = DEBUG_NONE,
              .last_pressed = INIT};
 
@@ -22,6 +24,8 @@ static void stdin_cb(EV_P_ ev_io *w, int revents) {
     // NOTE: Expects at least one byte ( reads upto 3 )
     int c = parse_input();
     handle_keypress(EV_A_ w, &app, c);
+
+    // Render info
     clear_text();
     app_draw_statusline(&app);
     app_draw_debug(&app);

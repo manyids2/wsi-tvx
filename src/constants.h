@@ -15,12 +15,31 @@
 #define MAX_HEIGHT 1024
 
 // --- Cache ---
+#define MAX_TILE_LAYER_CACHE 100
 #define MAX_TILE_CACHE 300
 #define LAYERS_CACHE 3
 #define MARGIN_CACHE 2
-
-// --- Threads ---
 #define NUM_THREADS 64
+
+typedef enum {
+  TILE_NO_ERROR = 0,
+  TILE_OPENSLIDE_ERROR,
+  TILE_KITTY_ERROR,
+  TILE_PTHREAD_ERROR,
+} tile_error_e;
+
+// lock helpers
+#define lock_cache()                                                           \
+  if (pthread_mutex_lock(cache->mutex)) {                                      \
+    perror("LRU Cache unable to obtain mutex lock");                           \
+    return LRUC_PTHREAD_ERROR;                                                 \
+  }
+
+#define unlock_cache()                                                         \
+  if (pthread_mutex_unlock(cache->mutex)) {                                    \
+    perror("LRU Cache unable to release mutex lock");                          \
+    return LRUC_PTHREAD_ERROR;                                                 \
+  }
 
 // --- Terminal ---
 enum keys_e {
