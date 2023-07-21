@@ -14,8 +14,10 @@ void app_init(app_t *app, char *slidepath) {
 
   // Start at minimum zoom, centered
   int level = app->world->mlevel;
-  int64_t wx = app->world->ww / 2;
-  int64_t wy = app->world->wh / 2;
+  int64_t wx = app->world->ww / 2 -
+               (int)(app->world->vw * slide->downsamples[level] / 2);
+  int64_t wy = app->world->wh / 2 -
+               (int)(app->world->vh * slide->downsamples[level] / 2);
   setup_view(app, level, wx, wy);
 
   // Draw statusline

@@ -165,7 +165,6 @@ void zoom_in(app_t *app) {
     return;
   view_update_level(app, level);
   view_update_worldxy(app, view->wx, view->wy);
-  view_update_left_top(app, view->left, view->top);
 }
 
 void zoom_out(app_t *app) {
@@ -177,7 +176,6 @@ void zoom_out(app_t *app) {
     return;
   view_update_level(app, level);
   view_update_worldxy(app, view->wx, view->wy);
-  view_update_left_top(app, view->left, view->top);
 }
 
 void toggle_thumbnail(app_t *app) {
