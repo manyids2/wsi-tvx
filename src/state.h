@@ -16,6 +16,8 @@ typedef struct slide_t {
   int has_thumbnail;
   uint32_t *thumbnail;
   int64_t thumbnail_w, thumbnail_h;
+
+  char slidepath[1024];
 } slide_t;
 
 // ---  View  ---

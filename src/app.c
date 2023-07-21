@@ -17,7 +17,7 @@ void app_init(app_t *app, char *slidepath) {
   setup_view(app, level);
 
   // Show stuff
-  app_debug_world(app);
+  app_draw_debug(app);
   app_draw_statusline(app);
 }
 
@@ -105,13 +105,20 @@ void app_draw_statusline(app_t *app) {
   write_or_die(s, len, "app_draw_statusline");
 }
 
-void app_debug_world(app_t *app) {
+void app_draw_debug(app_t *app) {
+  slide_t *slide = app->slide;
   world_t *world = app->world;
   view_t *view = app->view;
-  char s[1024];
+  char s[2048];
   int len = snprintf(
       s, sizeof(s),
-      "World:          \r\n"
+      "Slide:            \r\n"
+      "  slidepath    : %s       \r\n"
+      "  level_count  : %d       \r\n"
+      "  has_thumbnail: %d       \r\n"
+      "    w, h       : %ld, %ld \r\n"
+      "\r\n"
+      "World:                  \r\n"
       " rows, cols: %6d, %6d   \r\n"
       "   ww,   wh: %6ld, %6ld \r\n"
       "   vw,   vh: %6d, %6d   \r\n"
@@ -135,12 +142,14 @@ void app_debug_world(app_t *app) {
       "         thumb: %d      \r\n"
       "  last_pressed: %d      \r\n"
       "\r\n",
-      world->rows, world->cols, world->ww, world->wh, world->vw, world->vh,
-      world->cw, world->ch, world->ox, world->oy, world->vmi, world->vmj,
-      world->mlevel, view->level, view->zoom, view->left, view->top, view->smi,
-      view->smj, view->sw, view->sh, view->sx, view->sy, view->wx, view->wy,
-      view->ol, view->oi, view->oj, app->debug, app->thumb, app->last_pressed);
-  move_cursor(3, 0);
+      slide->slidepath, slide->level_count, slide->has_thumbnail,
+      slide->thumbnail_w, slide->thumbnail_h, world->rows, world->cols,
+      world->ww, world->wh, world->vw, world->vh, world->cw, world->ch,
+      world->ox, world->oy, world->vmi, world->vmj, world->mlevel, view->level,
+      view->zoom, view->left, view->top, view->smi, view->smj, view->sw,
+      view->sh, view->sx, view->sy, view->wx, view->wy, view->ol, view->oi,
+      view->oj, app->debug, app->thumb, app->last_pressed);
+  move_cursor(0, 0);
   write_or_die(s, len, "app_get_debug_world");
 }
 

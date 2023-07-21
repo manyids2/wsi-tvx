@@ -1,6 +1,9 @@
+#include "constants.h"
 #include "state.h"
 #include <assert.h>
+#include <error.h>
 #include <openslide/openslide.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

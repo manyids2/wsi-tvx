@@ -16,4 +16,4 @@ void app_set_slide_from_worldxy(app_t *app);
 
 void app_draw_statusline(app_t *app);
 
-void app_debug_world(app_t *app);
+void app_draw_debug(app_t *app);

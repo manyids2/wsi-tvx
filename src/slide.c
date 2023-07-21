@@ -1,9 +1,13 @@
 #include "slide.h"
 
 void slide_init(slide_t *slide, char *slidepath) {
+  // Save slidename
+  strncpy(slide->slidepath, slidepath, sizeof(slide->slidepath));
+
   // Open ( exit if error )
   openslide_t *osr = openslide_open(slidepath);
-  assert(osr != NULL && openslide_get_error(osr) == NULL);
+  if (osr == NULL || openslide_get_error(osr) != NULL)
+    die("No such file found\r\n");
   slide->osr = osr;
 
   // Get count of levels in wsi pyramid
@@ -22,7 +26,6 @@ void slide_load_thumbnail(slide_t *slide) {
   const char *const *associated_image_names =
       openslide_get_associated_image_names(slide->osr);
 
-  slide->has_thumbnail = 0;
   while (*associated_image_names) {
     int64_t w, h;
     const char *name = *associated_image_names;

@@ -19,6 +19,7 @@ enum keys_e {
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 // ---  Slide  ---
+#define MAX_PATH_LENGTH 1024
 #define MAX_LEVELS 32
 #define MAX_ASSOCIATED_IMAGES 8
 #define THUMBNAIL_ID 1

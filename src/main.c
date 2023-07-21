@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 // Initialize app
-slide_t slide;
+slide_t slide = {0};
 world_t world = {0};
 view_t view = {0};
 app_t app = {.slide = &slide,
@@ -23,7 +23,7 @@ static void stdin_cb(EV_P_ ev_io *w, int revents) {
     int c = parse_input();
     handle_keypress(EV_A_ w, &app, c);
     app_draw_statusline(&app);
-    app_debug_world(&app);
+    app_draw_debug(&app);
   }
 }
 
@@ -33,12 +33,12 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // Full screen terminal
-  setup_term();
-
   // Get path to slide
   char *slidepath = argv[1];
-  printf("slidepath: %s\r\n", slidepath);
+  // printf("slidepath: %s\r\n", slidepath);
+
+  // Full screen terminal
+  setup_term();
 
   // Initialize slide, world, view
   app_init(&app, slidepath);
