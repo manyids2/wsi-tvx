@@ -15,6 +15,7 @@
 #define MAX_HEIGHT 1024
 
 // --- Cache ---
+#define KITTY_ID_OFFSET 1000
 #define MAX_TILE_LAYER_CACHE 100
 #define MAX_TILE_CACHE 300
 #define LAYERS_CACHE 3

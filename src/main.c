@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   app_init(&app, slidepath);
 
   // Test load
-  uint32_t kitty_id = tile_load(app.tiles, 0, 0, 0);
+  uint32_t kitty_id = tile_get(app.tiles, 0, 0, 0);
   tile_display(kitty_id, 5, 5, 0, 0, 10);
 
   // Start the event loop

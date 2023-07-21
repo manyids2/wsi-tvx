@@ -39,22 +39,22 @@ void setup_world(app_t *app) {
   // Values to retrieve
   int *rows = &app->world->rows;
   int *cols = &app->world->cols;
-  int *vw = &app->world->vw;
-  int *vh = &app->world->vh;
+  int *fvw = &app->world->fvw;
+  int *fvh = &app->world->fvh;
 
   // Query using IOCTL first, then kitty
-  get_window_size(rows, cols, vw, vh);
+  get_window_size(rows, cols, fvw, fvh);
 
   // TODO: Not working
   // get_window_size_kitty(vw, vh);
 
   // Compute character dims
-  world->cw = world->vw / world->cols;
-  world->ch = world->vh / world->rows;
+  world->cw = world->fvw / world->cols;
+  world->ch = world->fvh / world->rows;
 
   // IMPORTANT: Only after character dims are computed, impose view maxima
-  world->vw = MIN(world->vw, MAX_WIDTH);
-  world->vh = MIN(world->vh, MAX_HEIGHT);
+  world->vw = MIN(world->fvw, MAX_WIDTH);
+  world->vh = MIN(world->fvh, MAX_HEIGHT);
 
   // Compute maximum level, cols and rows
   world->mlevel = slide->level_count - 1;
@@ -64,23 +64,51 @@ void setup_world(app_t *app) {
   // Get world dims from slide
   world->ww = slide->level_w[0];
   world->wh = slide->level_h[0];
+
+  // Compute positions on screen
+  double x, y;
+  int pad_x = (world->fvw - world->vw) / 2;
+  int pad_y = (world->fvh - world->vh) / 2;
+  for (int i = 0; i < world->vmi; i++) {
+    for (int j = 0; j < world->vmj; j++) {
+      pos_t *pos = &world->pos[i * world->vmj + j];
+      x = (i * TILE_SIZE) + pad_x;
+      y = (j * TILE_SIZE) + pad_y;
+      pos->col = (int)floor(x / world->cw);
+      pos->row = (int)floor(y / world->ch);
+      pos->X = x - (pos->col * world->cw);
+      pos->Y = y - (pos->row * world->ch);
+    }
+  }
 }
 
 void setup_view(app_t *app, int level, int64_t wx, int64_t wy) {
   view_t *view = app->view;
   slide_t *slide = app->slide;
 
-  // Set proper level
+  // Copy maximum tiles in view
+  view->vmi = app->world->vmi;
+  view->vmj = app->world->vmj;
+
+  // Setup level dependent constants
   view_update_level(view, slide, level);
 
-  // Center on center of slide
+  // Setup view dependent constants given wx, wy
   view_set_wx_wy(view, wx, wy);
 }
 
 void setup_tiles(app_t *app) {
+  view_t *view = app->view;
+  world_t *world = app->world;
   tiles_t *tiles = app->tiles;
-  tiles_init(tiles);
+  // Keep reference to slide
   tiles->osr = app->slide->osr;
+
+  // Initialize mutex
+  tiles_init(tiles);
+
+  // Load current level
+  tiles_load_view(tiles, view, world);
 }
 
 void app_draw_statusline(app_t *app) {

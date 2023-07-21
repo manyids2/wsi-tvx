@@ -1,4 +1,5 @@
 #include "keys.h"
+#include "tiles.h"
 #include "view.h"
 
 int parse_input(void) {
@@ -161,11 +162,14 @@ void zoom_in(app_t *app) {
   app->last_pressed = ZOOM_IN;
   view_t *view = app->view;
   slide_t *slide = app->slide;
+  world_t *world = app->world;
+  tiles_t *tiles = app->tiles;
   int level = MAX(0, view->level - 1);
   if (level == view->level)
     return;
   view_update_level(view, slide, level);
   view_set_wx_wy(view, view->wx, view->wy);
+  tiles_load_view(tiles, view, world);
 }
 
 void zoom_out(app_t *app) {
@@ -173,11 +177,13 @@ void zoom_out(app_t *app) {
   view_t *view = app->view;
   slide_t *slide = app->slide;
   world_t *world = app->world;
+  tiles_t *tiles = app->tiles;
   int level = MIN(world->mlevel, view->level + 1);
   if (level == view->level)
     return;
   view_update_level(view, slide, level);
   view_set_wx_wy(view, view->wx, view->wy);
+  tiles_load_view(tiles, view, world);
 }
 
 void toggle_thumbnail(app_t *app) {

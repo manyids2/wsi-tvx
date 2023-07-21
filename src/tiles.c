@@ -15,7 +15,41 @@ void tiles_free(tiles_t *tiles) {
   }
 }
 
-uint32_t tile_load(tiles_t *tiles, int level, int left, int top) {
+void tiles_clear(tiles_t *tiles) {
+  for (int i = 0; i < MAX_TILE_CACHE; i++) {
+    if (tiles->tiles[i].kitty_id >= 0) {
+      tile_clear(tiles->tiles[i].kitty_id);
+    }
+  }
+}
+
+void tiles_load_view(tiles_t *tiles, view_t *view, world_t *world) {
+  // First clear all tiles
+  tiles_clear(tiles);
+
+  int level = view->level;
+  int left = view->left;
+  int top = view->top;
+  int vmi = world->vmi;
+  int vmj = world->vmj;
+  int index, si, sj;
+  for (int i = 0; i < vmi; i++) {
+    for (int j = 0; j < vmj; j++) {
+      // Checks if loaded, else loads
+      si = i + left;
+      sj = j + top;
+      index = tile_get(tiles, level, si, sj);
+      if (index == -1)
+        index = tile_load(tiles, level, si, sj);
+
+      uint32_t kitty_id = tiles->tiles[index].kitty_id;
+      pos_t pos = world->pos[i * vmj + j];
+      tile_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
+    }
+  }
+}
+
+int tile_get(tiles_t *tiles, int level, int left, int top) {
   // Check all tiles
   tile_t tile;
   for (int index = 0; index < MAX_TILE_CACHE; index++) {
@@ -23,10 +57,18 @@ uint32_t tile_load(tiles_t *tiles, int level, int left, int top) {
     if (tile.kitty_id > 0) {
       if ((tile.level == level) && (tile.si == left) && (tile.sj == top)) {
         // Already loaded, so return index
+        tile.freq += 1;
         return index;
       }
     }
   }
+  return -1;
+}
+
+int tile_load(tiles_t *tiles, int level, int left, int top) {
+  // FIFO kind of cache
+  int current = (tiles->current + 1) % MAX_TILE_CACHE;
+  tiles->current = current;
 
   // Not found, so start loading
   int64_t sx = left * TILE_SIZE;
@@ -41,9 +83,17 @@ uint32_t tile_load(tiles_t *tiles, int level, int left, int top) {
   RGBAtoRGBbase64(TILE_SIZE * TILE_SIZE, tiles->buf, tiles->buf64);
 
   // Send to kitty
-  uint32_t kitty_id = 1000;
-  tile_provision(kitty_id, TILE_SIZE, TILE_SIZE, tiles->buf64);
-  return kitty_id;
+  tile_provision(current + KITTY_ID_OFFSET, TILE_SIZE, TILE_SIZE, tiles->buf64);
+
+  // Register tile
+  tiles->tiles[current].kitty_id = current + KITTY_ID_OFFSET;
+  tiles->tiles[current].level = level;
+  tiles->tiles[current].si = left;
+  tiles->tiles[current].sj = top;
+  tiles->tiles[current].vi = 0; // TODO: Use these
+  tiles->tiles[current].vj = 0;
+  tiles->tiles[current].freq = 1;
+  return current;
 }
 
 void tile_provision(uint32_t kitty_id, int w, int h, char *buf64) {
