@@ -33,9 +33,9 @@ enum keys_e {
 #define MAX_HEIGHT 1024
 
 // --- Cache ---
-#define MARGIN_XY_CACHE 2
-#define LAYERS_CACHE 3
 #define MAX_TILE_CACHE 300
+#define LAYERS_CACHE 3
+#define MARGIN_CACHE 2
 
 // --- Threads ---
 #define NUM_THREADS 64

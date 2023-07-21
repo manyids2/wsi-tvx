@@ -97,9 +97,13 @@ void app_set_slide_from_worldxy(app_t *app) {
 }
 
 void app_draw_statusline(app_t *app) {
+  slide_t *slide = app->slide;
+  world_t *world = app->world;
+  view_t *view = app->view;
   char s[256];
-  int len = snprintf(s, sizeof(s), "Press 'h' for help  ( last_pressed:  %d )",
-                     app->last_pressed);
+  int len = snprintf(s, sizeof(s), " %s  |   %d / %d | ⇱  %d, %d",
+                     slide->slidepath, view->level, world->mlevel, view->left,
+                     view->top);
 
   move_cursor(app->world->rows - 1, 1);
   write_or_die(s, len, "app_draw_statusline");

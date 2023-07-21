@@ -49,10 +49,10 @@ typedef struct view_t {
 typedef struct tile_t {
   int si, sj, level; // Identity of tile
   int vi, vj;        // Position wrt view ( can be negative )
-  int32_t kitty_id;  // ID used by kitty
+  int32_t kitty_id;  // ID used by kitty, used to indicate if tile is loaded
 } tile_t;
 
-// Position on screen ( params for draw/clear image )
+// Position on screen ( params for draw image/text )
 typedef struct pos_t {
   int i, j;           // Position in view grid
   int col, row, X, Y; // Position in pixels to pass to kitty
@@ -67,10 +67,15 @@ typedef struct thread_info {
 
 // -- Wrap it all up ---
 typedef struct app_t {
-  // data
-  world_t *world;
+  // world
   slide_t *slide;
+  world_t *world;
   view_t *view;
+  tile_t tiles[MAX_TILE_CACHE];         // Loaded tiles and kitty_id
+  int visible[MAX_COLS * MAX_ROWS *     // indices of visible tiles
+              LAYERS_CACHE];            // ... over 3 layers
+  int cache[(MARGIN_CACHE + MAX_COLS) * // indices of cache tiles
+            (MARGIN_CACHE * MAX_ROWS) * LAYERS_CACHE]; // ... over 3 layers
   // ui
   int debug;
   int thumb;
