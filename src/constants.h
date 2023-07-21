@@ -38,9 +38,9 @@ enum keys_e {
 
 // --- Debug ---
 enum debug_e {
-  DEBUG_NONE = 1,
-  DEBUG_STATE = 2,
-  DEBUG_TILES = 3,
+  DEBUG_NONE = 0,
+  DEBUG_STATE = 1,
+  DEBUG_TILES = 2,
 };
 #define NUM_DEBUG 3
 

@@ -12,7 +12,7 @@ view_t view = {0};
 app_t app = {.slide = &slide,
              .world = &world,
              .view = &view,
-             .debug = 0,
+             .debug = DEBUG_NONE,
              .last_pressed = INIT};
 
 ev_io stdin_watcher;

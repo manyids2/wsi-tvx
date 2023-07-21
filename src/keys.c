@@ -120,50 +120,64 @@ void handle_keypress(struct ev_loop *loop, ev_io *w, app_t *app, int c) {
 }
 
 void move_left(app_t *app) {
+  app->last_pressed = MOVE_LEFT;
   view_t *view = app->view;
   int left = MAX(0, view->left - 1);
+  if (left == view->left)
+    return;
   view_update_left_top(app, left, view->top);
-  app->last_pressed = MOVE_LEFT;
 }
 
 void move_right(app_t *app) {
+  app->last_pressed = MOVE_RIGHT;
   view_t *view = app->view;
   world_t *world = app->world;
   int left = MIN(view->smi - world->vmi, view->left + 1);
+  if (left == view->left)
+    return;
   view_update_left_top(app, left, view->top);
-  app->last_pressed = MOVE_RIGHT;
 }
 
 void move_up(app_t *app) {
+  app->last_pressed = MOVE_UP;
   view_t *view = app->view;
   int top = MAX(0, view->top - 1);
+  if (top == view->top)
+    return;
   view_update_left_top(app, view->left, top);
-  app->last_pressed = MOVE_UP;
 }
 
 void move_down(app_t *app) {
+  app->last_pressed = MOVE_DOWN;
   view_t *view = app->view;
   world_t *world = app->world;
   int top = MIN(view->smj - world->vmj, view->top + 1);
+  if (top == view->top)
+    return;
   view_update_left_top(app, view->left, top);
-  app->last_pressed = MOVE_DOWN;
 }
 
 void zoom_in(app_t *app) {
+  app->last_pressed = ZOOM_IN;
   view_t *view = app->view;
   int level = MAX(0, view->level - 1);
+  if (level == view->level)
+    return;
   view_update_level(app, level);
   view_update_worldxy(app, view->wx, view->wy);
-  app->last_pressed = ZOOM_IN;
+  view_update_left_top(app, view->left, view->top);
 }
 
 void zoom_out(app_t *app) {
+  app->last_pressed = ZOOM_OUT;
   view_t *view = app->view;
   world_t *world = app->world;
   int level = MIN(world->mlevel, view->level + 1);
+  if (level == view->level)
+    return;
   view_update_level(app, level);
   view_update_worldxy(app, view->wx, view->wy);
-  app->last_pressed = ZOOM_OUT;
+  view_update_left_top(app, view->left, view->top);
 }
 
 void toggle_thumbnail(app_t *app) {

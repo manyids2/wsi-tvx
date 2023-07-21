@@ -71,11 +71,8 @@ typedef struct app_t {
   slide_t *slide;
   world_t *world;
   view_t *view;
-  tile_t tiles[MAX_TILE_CACHE];         // Loaded tiles and kitty_id
-  int visible[MAX_COLS * MAX_ROWS *     // indices of visible tiles
-              LAYERS_CACHE];            // ... over 3 layers
-  int cache[(MARGIN_CACHE + MAX_COLS) * // indices of cache tiles
-            (MARGIN_CACHE * MAX_ROWS) * LAYERS_CACHE]; // ... over 3 layers
+  tile_t tiles[MAX_TILE_CACHE];     // Loaded tiles and kitty_id
+  int visible[MAX_COLS * MAX_ROWS]; // indices of visible tiles
   // ui
   int debug;
   int thumb;

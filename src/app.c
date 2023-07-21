@@ -12,12 +12,13 @@ void app_init(app_t *app, char *slidepath) {
   setup_slide(slide, slidepath);
   setup_world(app);
 
-  // Start at minimum zoom
+  // Start at minimum zoom, centered
   int level = app->world->mlevel;
-  setup_view(app, level);
+  int64_t wx = app->world->ww / 2;
+  int64_t wy = app->world->wh / 2;
+  setup_view(app, level, wx, wy);
 
-  // Show stuff
-  app_draw_debug(app);
+  // Draw statusline
   app_draw_statusline(app);
 }
 
@@ -60,14 +61,12 @@ void setup_world(app_t *app) {
   world->wh = slide->level_h[0];
 }
 
-void setup_view(app_t *app, int level) {
-  world_t *world = app->world;
-
+void setup_view(app_t *app, int level, int64_t wx, int64_t wy) {
   // Set proper level
   view_update_level(app, level);
 
   // Center on center of slide
-  view_update_worldxy(app, world->ww / 2, world->wh / 2);
+  view_update_worldxy(app, wx, wy);
 }
 
 void app_draw_statusline(app_t *app) {
@@ -81,7 +80,7 @@ void app_draw_statusline(app_t *app) {
   move_cursor(0, 0);
   write_or_die(s, len, "app_draw_statusline");
 
-  len = snprintf(s, world->cols, "   %d / %d | ⇱  %d, %d", view->level,
+  len = snprintf(s, world->cols, "   %d / %d | ⇱  %3d, %3d", view->level,
                  world->mlevel, view->left, view->top);
   move_cursor(app->world->rows - 1, world->cols - len);
   write_or_die(s, len, "app_draw_statusline");
@@ -133,7 +132,7 @@ void app_draw_debug_state(app_t *app) {
       view->zoom, view->left, view->top, view->smi, view->smj, view->sw,
       view->sh, view->sx, view->sy, view->wx, view->wy, view->ol, view->oi,
       view->oj, app->debug, app->thumb, app->last_pressed);
-  move_cursor(0, 0);
+  move_cursor(2, 0);
   write_or_die(s, len, "app_get_debug_world");
 }
 

@@ -30,8 +30,8 @@ void view_update_worldxy(app_t *app, int wx, int wy) {
 
   // Compute left top from center
   int left, top;
-  left = MAX(0, (int)(sx - (world->vw / 2)) / TILE_SIZE);
-  top = MAX(0, (int)(sy - (world->vh / 2)) / TILE_SIZE);
+  left = MAX(0, (int)((sx - (world->vw / 2)) / TILE_SIZE));
+  top = MAX(0, (int)((sy - (world->vh / 2)) / TILE_SIZE));
   view_update_left_top(app, left, top);
 }
 
