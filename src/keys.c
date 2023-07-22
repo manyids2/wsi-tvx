@@ -208,6 +208,7 @@ void zoom_out(app_t *app) {
 
 void toggle_thumbnail(app_t *app) {
   app->thumb = !app->thumb;
+  slide_toggle_thumbnail(app->slide, app->world, app->thumb);
   app->last_pressed = TOGGLE_THUMBNAIL;
 }
 

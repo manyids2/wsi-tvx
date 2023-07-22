@@ -25,6 +25,7 @@ void app_init(app_t *app, char *slidepath) {
 
   // Tiles, including loading them
   setup_tiles(app);
+  slide_toggle_thumbnail(app->slide, app->world, 1);
 
   // Draw statusline
   app_draw_statusline(app);
@@ -33,6 +34,7 @@ void app_init(app_t *app, char *slidepath) {
 void setup_slide(slide_t *slide, char *slidepath) {
   slide_init(slide, slidepath);
   slide_load_thumbnail(slide);
+  slide_provision_thumbnail(slide);
 }
 
 void setup_world(app_t *app) {

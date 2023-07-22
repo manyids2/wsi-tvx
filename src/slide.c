@@ -1,4 +1,6 @@
 #include "slide.h"
+#include <math.h>
+#include <stdlib.h>
 
 void slide_init(slide_t *slide, char *slidepath) {
   // Save slidename
@@ -50,6 +52,32 @@ void slide_load_thumbnail(slide_t *slide) {
     slide->thumbnail_h = MIN_PIXELS;
     slide->thumbnail_w = MIN_PIXELS;
     slide->thumbnail = calloc(MIN_PIXELS * MIN_PIXELS, sizeof(uint32_t));
+  }
+}
+
+void slide_provision_thumbnail(slide_t *slide) {
+  int w = slide->thumbnail_w;
+  int h = slide->thumbnail_h;
+  char *buf64 = malloc(w * h * 4 * sizeof(char) + 1);
+  RGBAtoRGBbase64(w * h, slide->thumbnail, buf64);
+  kitty_provision(KITTY_ID_THUMBNAIL, w, h, buf64);
+  free(buf64);
+}
+void slide_toggle_thumbnail(slide_t *slide, world_t *world, int onoff) {
+  if (onoff == 1) {
+    // Position thumbnail
+    pos_t pos = {0};
+    double x = (double)(world->fvw - slide->thumbnail_w) / 2;
+    double y = (double)(world->fvh - slide->thumbnail_h) / 2;
+    x = MAX(x, world->cw);
+    y = MAX(y, world->ch);
+    pos.col = (int)floor(x / world->cw);
+    pos.row = (int)floor(y / world->ch);
+    pos.X = x - (pos.col * world->cw);
+    pos.Y = y - (pos.row * world->ch);
+    kitty_display(KITTY_ID_THUMBNAIL, pos.row, pos.col, pos.X, pos.Y, 1);
+  } else {
+    kitty_clear(KITTY_ID_THUMBNAIL);
   }
 }
 

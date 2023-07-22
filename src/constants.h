@@ -5,6 +5,7 @@
 #define MAX_LEVELS 32
 #define MAX_ASSOCIATED_IMAGES 8
 #define THUMBNAIL_ID 1
+#define KITTY_ID_THUMBNAIL 10
 #define MIN_PIXELS 32
 
 // ---  View  ---

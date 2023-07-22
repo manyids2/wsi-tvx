@@ -15,6 +15,7 @@ app_t app = {.slide = &slide,
              .view = &view,
              .tiles = &tiles,
              .debug = DEBUG_NONE,
+             .thumb = 1,
              .last_pressed = INIT};
 
 int main(int argc, char **argv) {

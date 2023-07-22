@@ -158,7 +158,7 @@ int tile_load(tiles_t *tiles, openslide_t *osr, double zoom, int level,
 
   // Send to kitty
   uint32_t kitty_id = current + KITTY_ID_OFFSET;
-  kittyProvisionImage(kitty_id, TILE_SIZE, TILE_SIZE, tiles->buf64);
+  kitty_provision(kitty_id, TILE_SIZE, TILE_SIZE, tiles->buf64);
 
   // Register tile
   tile_t *tile = &tiles->tiles[current];

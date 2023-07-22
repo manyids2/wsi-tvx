@@ -1,4 +1,6 @@
+#include "base64.h"
 #include "constants.h"
+#include "kitty.h"
 #include "state.h"
 #include <assert.h>
 #include <error.h>
@@ -13,6 +15,8 @@ void slide_free(slide_t *slide);
 
 // Read associated images to load thumbnail
 void slide_load_thumbnail(slide_t *slide);
+void slide_provision_thumbnail(slide_t *slide);
+void slide_toggle_thumbnail(slide_t *slide, world_t *world, int onoff);
 
 // Get (i, j)th tile from level (l), given tile size (ts)
 void slide_get_tile(slide_t *slide, uint32_t *buf, int l, int i, int j);
