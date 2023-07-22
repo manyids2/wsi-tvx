@@ -14,6 +14,7 @@ void app_init(app_t *app, char *slidepath) {
   slide_t *slide = app->slide;
   setup_slide(slide, slidepath);
   setup_world(app);
+  slide_toggle_thumbnail(app->slide, app->world, 1);
 
   // Start at minimum zoom, centered
   int level = app->world->mlevel;
@@ -25,7 +26,6 @@ void app_init(app_t *app, char *slidepath) {
 
   // Tiles, including loading them
   setup_tiles(app);
-  slide_toggle_thumbnail(app->slide, app->world, 1);
 
   // Draw statusline
   app_draw_statusline(app);

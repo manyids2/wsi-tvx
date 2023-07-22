@@ -81,6 +81,8 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
   int level = view->level;
   int left = view->left;
   int top = view->top;
+  int smi = view->smi;
+  int smj = view->smj;
   int vmi = world->vmi;
   int vmj = world->vmj;
   int index, si, sj;
@@ -114,6 +116,48 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
         // Get kitty id and display in grid
         uint32_t kitty_id = tiles->tiles[index].kitty_id;
         kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
+      }
+    }
+  }
+
+  // Then handle cache - left and right
+  for (int i = 0; i <= MARGIN_CACHE; i++) {
+    for (int j = 0; j < vmj; j++) {
+      sj = top + j;
+
+      // left border
+      si = MAX(left - i, 0);
+      index = tile_get(tiles, level, si, sj);
+      if (index == -1) {
+        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
+      }
+
+      // right border
+      si = MIN(left + vmi + i, smi - 1);
+      index = tile_get(tiles, level, si, sj);
+      if (index == -1) {
+        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
+      }
+    }
+  }
+
+  // Then handle cache - top and bottom
+  for (int i = 0; i < vmi; i++) {
+    for (int j = 0; j <= MARGIN_CACHE; j++) {
+      si = left + i;
+
+      // top border
+      sj = MAX(top - j, 0);
+      index = tile_get(tiles, level, si, sj);
+      if (index == -1) {
+        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
+      }
+
+      // bottom border
+      sj = MIN(top + vmj + j, smj - 1);
+      index = tile_get(tiles, level, si, sj);
+      if (index == -1) {
+        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
       }
     }
   }
