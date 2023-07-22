@@ -84,6 +84,7 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
     for (int i = 0; i < MAX_TILE_CACHE; i++) {
       tiles->tiles[i].kitty_id = 0;
     }
+    slide_provision_thumbnail(slide);
   }
 
   int level = view->level;
