@@ -41,13 +41,13 @@ make
 - Needs terminal support for [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/).
 - Terminal needs to respond to `\x1b[14t` request for pixel dimensions.
 - Only tested on Linux.
+- Not optimal base64
+  - Use [race64](https://github.com/skeeto/race64) for base64 encoding ( with SIMD optimizations ).
+  - However, we convert RGBA to RGB to send less info ( 25% lesser than original for each tile ).
 
 ## Issues
 
 - Crashes sometimes, use `r` to reset.
-- Tile positions are not always correct.
-- Not optimal base64
-  - Use [race64](https://github.com/skeeto/race64) for base64 encoding ( with SIMD optimizations ).
 
 ## Tests
 

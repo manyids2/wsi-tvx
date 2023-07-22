@@ -32,7 +32,7 @@ void kitty_display(uint32_t kitty_id, int row, int col, int X, int Y, int Z) {
   int len =
       snprintf(s, sizeof(s), "\x1b_Ga=p,i=%u,q=2,X=%d,Y=%d,C=1,z=%d;\x1b\\",
                kitty_id, X, Y, Z);
-  move_cursor(row, col);
+  move_cursor(row + 1, col + 1);
   write_or_die(s, len, "kitty_display");
 }
 
