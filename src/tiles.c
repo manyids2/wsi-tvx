@@ -85,20 +85,37 @@ void tiles_load_view(tiles_t *tiles, view_t *view, world_t *world) {
   int vmi = world->vmi;
   int vmj = world->vmj;
   int index, si, sj;
+
+  // First display what is already there
   for (int i = 0; i < vmi; i++) {
     for (int j = 0; j < vmj; j++) {
       pos_t pos = world->pos[i * vmj + j];
-
       // Checks if loaded, else loads
       si = i + left;
       sj = j + top;
       index = tile_get(tiles, level, si, sj);
-      if (index == -1)
-        index = tile_load(tiles, level, si, sj);
+      if (index >= 0) {
+        // Get kitty id and display in grid
+        uint32_t kitty_id = tiles->tiles[index].kitty_id;
+        kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
+      }
+    }
+  }
 
-      // Get kitty id and display in grid
-      uint32_t kitty_id = tiles->tiles[index].kitty_id;
-      kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
+  // Then handle requests
+  for (int i = 0; i < vmi; i++) {
+    for (int j = 0; j < vmj; j++) {
+      pos_t pos = world->pos[i * vmj + j];
+      // Checks if loaded, else loads
+      si = i + left;
+      sj = j + top;
+      index = tile_get(tiles, level, si, sj);
+      if (index == -1) {
+        index = tile_load(tiles, level, si, sj);
+        // Get kitty id and display in grid
+        uint32_t kitty_id = tiles->tiles[index].kitty_id;
+        kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
+      }
     }
   }
 }
