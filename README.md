@@ -44,7 +44,7 @@ make
 ## Issues
 
 - Tile positions are not always correct.
-  - ![tiling-issues](./images/tiling-issues.png)
+  - ![tiling-issues](./screenshots/tiling-issues.png)
 - If it crashes, kitty needs to be reset.
   - use `reset`
 - Not optimal base64
