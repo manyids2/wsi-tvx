@@ -1,6 +1,7 @@
 SRC_FILES := $(wildcard src/*.c)
 HDR_FILES := $(wildcard src/*.h)
-LDFLAGS := -lopenslide -lm -lev -lunistring
+LDFLAGS := -lopenslide -lm
+TESTLDFLAGS := -lopenslide -lm -lev -lunistring
 CXXFLAGS := -Wall -Wextra -pedantic -std=c99 -O3 -pg
 
 # --- wsi-tvx ---
@@ -11,19 +12,19 @@ bin/wsi-tvx: main.c $(SRC_FILES) $(HDR_FILES)
 # --- tests ---
 
 tests/bin/test-kitty: tests/test-kitty.c $(SRC_FILES) $(HDR_FILES)
-	$(CC) tests/test-kitty.c $(SRC_FILES) -o tests/bin/test-kitty $(LDFLAGS) $(CXXFLAGS)
+	$(CC) tests/test-kitty.c $(SRC_FILES) -o tests/bin/test-kitty $(TESTLDFLAGS) $(CXXFLAGS)
 
 tests/bin/test-base64: tests/test-base64.c $(SRC_FILES) $(HDR_FILES)
-	$(CC) tests/test-base64.c $(SRC_FILES) -o tests/bin/test-base64 $(LDFLAGS) $(CXXFLAGS)
+	$(CC) tests/test-base64.c $(SRC_FILES) -o tests/bin/test-base64 $(TESTLDFLAGS) $(CXXFLAGS)
 
 tests/bin/test-tiles: tests/test-tiles.c $(SRC_FILES) $(HDR_FILES)
-	$(CC) tests/test-tiles.c $(SRC_FILES) -o tests/bin/test-tiles $(LDFLAGS) $(CXXFLAGS)
+	$(CC) tests/test-tiles.c $(SRC_FILES) -o tests/bin/test-tiles $(TESTLDFLAGS) $(CXXFLAGS)
 
 tests/bin/test-slide: tests/test-slide.c $(SRC_FILES) $(HDR_FILES)
-	$(CC) tests/test-slide.c $(SRC_FILES) -o tests/bin/test-slide $(LDFLAGS) $(CXXFLAGS)
+	$(CC) tests/test-slide.c $(SRC_FILES) -o tests/bin/test-slide $(TESTLDFLAGS) $(CXXFLAGS)
 
 tests/bin/test-term: tests/test-term.c $(SRC_FILES) $(HDR_FILES)
-	$(CC) tests/test-term.c $(SRC_FILES) -o tests/bin/test-term $(LDFLAGS) $(CXXFLAGS)
+	$(CC) tests/test-term.c $(SRC_FILES) -o tests/bin/test-term $(TESTLDFLAGS) $(CXXFLAGS)
 
 test:
 		make tests/bin/test-kitty
