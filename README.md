@@ -1,8 +1,14 @@
 # wsi-tvx
 
-Whole slide image - terminal viewer ( hopefully, multithreaded ).
+Whole slide image - terminal viewer.
 
 Refactor of `wsi-tv`, with focus on clarity, caching.
+
+![home](./screenshots/home.png)
+
+![thumbnail](./screenshots/thumbnail.png)
+
+![debug](./screenshots/debug.png)
 
 ## Installation
 
@@ -49,4 +55,3 @@ make
 ```bash
 make test
 ```
-
