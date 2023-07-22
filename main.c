@@ -37,14 +37,13 @@ int main(int argc, char **argv) {
   while (1) {
     // Get single keypress
     int c = parse_input();
-    clear_text();
 
     // Handle it
     handle_keypress(&app, c);
 
     // Render info
-    app_draw_statusline(&app);
     app_draw_debug(&app);
+    app_draw_statusline(&app);
   }
 
   // Free memory

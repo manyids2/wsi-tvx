@@ -87,94 +87,101 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
   int vmj = world->vmj;
   int index, si, sj;
 
-  // First display what is already there
+#define FIND_AND_DISPLAY                                                       \
+  index = tile_get(tiles, level, si, sj);                                      \
+  if (index >= 0) {                                                            \
+    uint32_t kitty_id = tiles->tiles[index].kitty_id;                          \
+    kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);               \
+  }
+
+#define LOAD_AND_DISPLAY                                                       \
+  index = tile_get(tiles, level, si, sj);                                      \
+  if (index == -1) {                                                           \
+    index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);           \
+    uint32_t kitty_id = tiles->tiles[index].kitty_id;                          \
+    kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);               \
+  }
+
+#define ONLY_LOAD                                                              \
+  index = tile_get(tiles, level, si, sj);                                      \
+  if (index == -1) {                                                           \
+    index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);           \
+  }
+
+  // First display what is already there, do not load anything
+  for (int i = 0; i < vmi; i++) {
+    for (int j = 0; j < vmj; j++) {
+      pos_t pos = world->pos[i * vmj + j];
+      si = i + left;
+      sj = j + top;
+      FIND_AND_DISPLAY
+    }
+  }
+
+  // Then handle requests - load and display immediately
   for (int i = 0; i < vmi; i++) {
     for (int j = 0; j < vmj; j++) {
       pos_t pos = world->pos[i * vmj + j];
       // Checks if loaded, else loads
       si = i + left;
       sj = j + top;
-      index = tile_get(tiles, level, si, sj);
-      if (index >= 0) {
-        // Get kitty id and display in grid
-        uint32_t kitty_id = tiles->tiles[index].kitty_id;
-        kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
-      }
+      LOAD_AND_DISPLAY
     }
   }
 
-  // Then handle requests
-  for (int i = 0; i < vmi; i++) {
-    for (int j = 0; j < vmj; j++) {
-      pos_t pos = world->pos[i * vmj + j];
-      // Checks if loaded, else loads
-      si = i + left;
-      sj = j + top;
-      index = tile_get(tiles, level, si, sj);
-      if (index == -1) {
-        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
-        // Get kitty id and display in grid
-        uint32_t kitty_id = tiles->tiles[index].kitty_id;
-        kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
-      }
-    }
-  }
-
-  // Then handle cache - left and right
+  // Then handle cache - left and right - only load
   for (int i = 0; i <= MARGIN_CACHE; i++) {
     for (int j = 0; j < vmj; j++) {
       sj = top + j;
 
       // left border
       si = MAX(left - i, 0);
-      index = tile_get(tiles, level, si, sj);
-      if (index == -1) {
-        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
-      }
+      ONLY_LOAD
 
       // right border
       si = MIN(left + vmi + i, smi - 1);
-      index = tile_get(tiles, level, si, sj);
-      if (index == -1) {
-        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
-      }
+      ONLY_LOAD
     }
   }
 
-  // Then handle cache - top and bottom
+  // Then handle cache - top and bottom - only load
   for (int i = 0; i < vmi; i++) {
     for (int j = 0; j <= MARGIN_CACHE; j++) {
       si = left + i;
 
       // top border
       sj = MAX(top - j, 0);
-      index = tile_get(tiles, level, si, sj);
-      if (index == -1) {
-        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
-      }
+      ONLY_LOAD
 
       // bottom border
       sj = MIN(top + vmj + j, smj - 1);
-      index = tile_get(tiles, level, si, sj);
-      if (index == -1) {
-        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
-      }
+      ONLY_LOAD
+    }
+  }
+
+  // Redraw just to make sure
+  for (int i = 0; i < vmi; i++) {
+    for (int j = 0; j < vmj; j++) {
+      pos_t pos = world->pos[i * vmj + j];
+      si = i + left;
+      sj = j + top;
+      FIND_AND_DISPLAY
     }
   }
 }
 
 int tile_get(tiles_t *tiles, int level, int left, int top) {
-  // Check all tiles
   tile_t tile;
   for (int index = 0; index < MAX_TILE_CACHE; index++) {
     tile = tiles->tiles[index];
     if ((tile.kitty_id >= KITTY_ID_OFFSET) && (tile.level == level) &&
         (tile.si == left) && (tile.sj == top)) {
-      // Already loaded, so return index
+      // Already loaded, return index
       tile.freq += 1;
       return index;
     }
   }
+  // not found
   return -1;
 }
 
@@ -183,11 +190,6 @@ int tile_load(tiles_t *tiles, openslide_t *osr, double zoom, int level,
   // FIFO kind of cache
   int current = (tiles->current + 1) % MAX_TILE_CACHE;
   tiles->current = current;
-
-  // // Check if it was already loaded, delete before reprovision
-  // if (tile.kitty_id >= KITTY_ID_OFFSET) {
-  //   kitty_delete(tile.kitty_id);
-  // }
 
   // Not found, so start loading
   int64_t sx = (left * TILE_SIZE) * zoom;
@@ -200,7 +202,7 @@ int tile_load(tiles_t *tiles, openslide_t *osr, double zoom, int level,
   // Base64 encode it
   RGBAtoRGBbase64(TILE_SIZE * TILE_SIZE, tiles->buf, tiles->buf64);
 
-  // Send to kitty
+  // BUG: Send to kitty -> what happens if it fails?
   uint32_t kitty_id = current + KITTY_ID_OFFSET;
   kitty_provision(kitty_id, TILE_SIZE, TILE_SIZE, tiles->buf64);
 

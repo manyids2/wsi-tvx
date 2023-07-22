@@ -182,6 +182,7 @@ void app_draw_debug_state(app_t *app) {
 }
 
 void app_draw_debug(app_t *app) {
+  clear_text();
   if (app->debug == DEBUG_STATE) {
     app_draw_debug_state(app);
   }
