@@ -54,7 +54,8 @@ enum keys_e {
   ZOOM_IN = 6,
   ZOOM_OUT = 7,
   TOGGLE_DEBUG = 8,
-  QUIT = 9,
+  LOG_TILES = 9,
+  QUIT = 10,
 };
 
 // --- Debug ---
@@ -64,6 +65,7 @@ enum debug_e {
   DEBUG_TILES = 2,
 };
 #define NUM_DEBUG 3
+#define LOG_FILE "debug.log"
 
 // --- Basics ---
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

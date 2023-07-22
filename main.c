@@ -34,14 +34,16 @@ int main(int argc, char **argv) {
   app_init(&app, slidepath);
 
   while (1) {
+    // Get single keypress
     int c = parse_input();
     clear_text();
 
+    // Handle it
     handle_keypress(&app, c);
 
     // Render info
-    app_draw_statusline(&app);
-    app_draw_debug(&app);
+    // app_draw_statusline(&app);
+    // app_draw_debug(&app);
   }
 
   // Free memory

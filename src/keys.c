@@ -58,6 +58,8 @@ int parse_input(void) {
       return TOGGLE_THUMBNAIL;
     case 'd':
       return TOGGLE_DEBUG;
+    case 'p':
+      return LOG_TILES;
     default:
       return c;
     }
@@ -71,6 +73,11 @@ void handle_keypress(app_t *app, int c) {
   case (CTRL_KEY('q')):
     app->last_pressed = QUIT;
     exit(EXIT_SUCCESS);
+    break;
+
+  // Log
+  case LOG_TILES:
+    tiles_log(app->tiles, app->logfile);
     break;
 
   // Up

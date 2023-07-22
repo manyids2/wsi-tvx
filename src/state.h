@@ -1,6 +1,7 @@
 #pragma once
 
 #include "constants.h"
+#include <bits/types/FILE.h>
 #include <openslide/openslide.h>
 #include <pthread.h>
 
@@ -85,5 +86,6 @@ typedef struct app_t {
   // ui
   int debug;
   int thumb;
+  FILE *logfile;
   enum keys_e last_pressed;
 } app_t;

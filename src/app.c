@@ -8,6 +8,9 @@ void setup_term(void) {
 }
 
 void app_init(app_t *app, char *slidepath) {
+  // Setup logger
+  app->logfile = fopen(LOG_FILE, "a+");
+
   slide_t *slide = app->slide;
   setup_slide(slide, slidepath);
   setup_world(app);
@@ -24,7 +27,7 @@ void app_init(app_t *app, char *slidepath) {
   setup_tiles(app);
 
   // Draw statusline
-  app_draw_statusline(app);
+  // app_draw_statusline(app);
 }
 
 void setup_slide(slide_t *slide, char *slidepath) {
@@ -132,7 +135,7 @@ void app_draw_debug_state(app_t *app) {
   slide_t *slide = app->slide;
   world_t *world = app->world;
   view_t *view = app->view;
-  char s[2048];
+  char s[4096];
   int len =
       snprintf(s, sizeof(s),
                "Slide:            \r\n"
@@ -188,4 +191,6 @@ void app_free(app_t *app) {
   tiles_t *tiles = app->tiles;
   tiles_free(tiles);
   slide_free(slide);
+
+  fclose(app->logfile);
 }

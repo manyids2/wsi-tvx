@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "kitty.h"
 #include "term.h"
+#include <stdio.h>
 
 void tiles_init(tiles_t *tiles) {
   tiles->mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
@@ -23,6 +24,19 @@ void tiles_clear(tiles_t *tiles) {
     if (tiles->tiles[i].kitty_id > KITTY_ID_OFFSET) {
       kitty_clear(tiles->tiles[i].kitty_id);
     }
+  }
+}
+
+void tiles_log(tiles_t *tiles, FILE *logfile) {
+  fprintf(logfile, "---------\r\n");
+  for (int i = 0; i < MAX_TILE_CACHE; i++) {
+    tile_t t = tiles->tiles[i];
+    if (t.kitty_id > 0)
+      fprintf(logfile,
+              "%d: %u\n"
+              "  %d, %d, %d\n"
+              "  %d, %d, %d\n",
+              i, t.kitty_id, t.level, t.si, t.sj, t.vi, t.vj, t.freq);
   }
 }
 

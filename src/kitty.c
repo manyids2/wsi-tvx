@@ -57,7 +57,7 @@ void kitty_provision(uint32_t kitty_id, int w, int h, char *buf64) {
 void kitty_display(uint32_t kitty_id, int row, int col, int X, int Y, int Z) {
   char s[64];
   int len =
-      snprintf(s, sizeof(s), "\x1b_Ga=p,i=%d,q=2,X=%d,Y=%d,C=1,z=%d;\x1b\\",
+      snprintf(s, sizeof(s), "\x1b_Ga=p,i=%u,q=2,X=%d,Y=%d,C=1,z=%d;\x1b\\",
                kitty_id, X, Y, Z);
   move_cursor(row, col);
   write_or_die(s, len, "kitty_display");
@@ -65,12 +65,12 @@ void kitty_display(uint32_t kitty_id, int row, int col, int X, int Y, int Z) {
 
 void kitty_clear(uint32_t kitty_id) {
   char s[64];
-  int len = snprintf(s, sizeof(s), "\x1b_Ga=d,d=i,i=%d;\x1b\\", kitty_id);
-  write_or_die("\x1b_Ga=d,d=i,i=%d;\x1b\\", len, "kitty_clear");
+  int len = snprintf(s, sizeof(s), "\x1b_Ga=d,d=i,i=%u;\x1b\\", kitty_id);
+  write_or_die(s, len, "kitty_clear");
 }
 
 void kitty_delete(uint32_t kitty_id) {
   char s[64];
-  int len = snprintf(s, sizeof(s), "\x1b_Ga=d,d=I,i=%d;\x1b\\", kitty_id);
-  write_or_die("\x1b_Ga=d,d=I,i=%d;\x1b\\", len, "kitty_delete");
+  int len = snprintf(s, sizeof(s), "\x1b_Ga=d,d=I,i=%u;\x1b\\", kitty_id);
+  write_or_die(s, len, "kitty_delete");
 }
