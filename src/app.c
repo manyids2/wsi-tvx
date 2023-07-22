@@ -101,17 +101,16 @@ void setup_view(app_t *app, int level, int64_t wx, int64_t wy) {
 }
 
 void setup_tiles(app_t *app) {
+  tiles_t *tiles = app->tiles;
+  slide_t *slide = app->slide;
   view_t *view = app->view;
   world_t *world = app->world;
-  tiles_t *tiles = app->tiles;
-  // Keep reference to slide
-  tiles->osr = app->slide->osr;
 
   // Initialize mutex
   tiles_init(tiles);
 
   // Load current level
-  tiles_load_view(tiles, view, world);
+  tiles_load_view(tiles, slide, view, world);
 }
 
 void app_draw_statusline(app_t *app) {

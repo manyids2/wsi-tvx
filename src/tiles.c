@@ -25,7 +25,7 @@ void tiles_free(tiles_t *tiles) {
 
 void tiles_clear(tiles_t *tiles) {
   for (int i = 0; i < MAX_TILE_CACHE; i++) {
-    if (tiles->tiles[i].kitty_id > KITTY_ID_OFFSET) {
+    if (tiles->tiles[i].kitty_id >= KITTY_ID_OFFSET) {
       kitty_clear(tiles->tiles[i].kitty_id);
     }
   }
@@ -54,13 +54,11 @@ void tiles_log(tiles_t *tiles, view_t *view, world_t *world, FILE *logfile) {
       si = i + left;
       sj = j + top;
       index = tile_get(tiles, level, si, sj);
-      if (index == -1)
-        index = tile_load(tiles, level, si, sj);
-
-      // Get kitty id and display in grid
-      uint32_t kitty_id = tiles->tiles[index].kitty_id;
-      fprintf(logfile, "%3d, %3d: %6u : %4d, %3d, %3d \n", i, j, kitty_id,
-              index, si, sj);
+      if (index != -1) {
+        uint32_t kitty_id = tiles->tiles[index].kitty_id;
+        fprintf(logfile, "%3d, %3d: %6u : %4d, %3d, %3d \n", i, j, kitty_id,
+                index, si, sj);
+      }
     }
   }
 
@@ -75,7 +73,8 @@ void tiles_log(tiles_t *tiles, view_t *view, world_t *world, FILE *logfile) {
   }
 }
 
-void tiles_load_view(tiles_t *tiles, view_t *view, world_t *world) {
+void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
+                     world_t *world) {
   // First clear all tiles
   tiles_clear(tiles);
 
@@ -111,7 +110,7 @@ void tiles_load_view(tiles_t *tiles, view_t *view, world_t *world) {
       sj = j + top;
       index = tile_get(tiles, level, si, sj);
       if (index == -1) {
-        index = tile_load(tiles, level, si, sj);
+        index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
         // Get kitty id and display in grid
         uint32_t kitty_id = tiles->tiles[index].kitty_id;
         kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);
@@ -135,19 +134,24 @@ int tile_get(tiles_t *tiles, int level, int left, int top) {
   return -1;
 }
 
-int tile_load(tiles_t *tiles, int level, int left, int top) {
+int tile_load(tiles_t *tiles, openslide_t *osr, double zoom, int level,
+              int left, int top) {
   // FIFO kind of cache
   int current = (tiles->current + 1) % MAX_TILE_CACHE;
   tiles->current = current;
 
+  // // Check if it was already loaded, delete before reprovision
+  // if (tile.kitty_id >= KITTY_ID_OFFSET) {
+  //   kitty_delete(tile.kitty_id);
+  // }
+
   // Not found, so start loading
-  int64_t sx = left * TILE_SIZE;
-  int64_t sy = top * TILE_SIZE;
+  int64_t sx = (left * TILE_SIZE) * zoom;
+  int64_t sy = (top * TILE_SIZE) * zoom;
 
   // Read from proper level and position
-  openslide_read_region(tiles->osr, tiles->buf, sx, sy, level, TILE_SIZE,
-                        TILE_SIZE);
-  assert(openslide_get_error(tiles->osr) == NULL);
+  openslide_read_region(osr, tiles->buf, sx, sy, level, TILE_SIZE, TILE_SIZE);
+  assert(openslide_get_error(osr) == NULL);
 
   // Base64 encode it
   RGBAtoRGBbase64(TILE_SIZE * TILE_SIZE, tiles->buf, tiles->buf64);
@@ -157,12 +161,13 @@ int tile_load(tiles_t *tiles, int level, int left, int top) {
   kittyProvisionImage(kitty_id, TILE_SIZE, TILE_SIZE, tiles->buf64);
 
   // Register tile
-  tiles->tiles[current].kitty_id = kitty_id;
-  tiles->tiles[current].level = level;
-  tiles->tiles[current].si = left;
-  tiles->tiles[current].sj = top;
-  tiles->tiles[current].vi = 0; // TODO: Use these
-  tiles->tiles[current].vj = 0;
-  tiles->tiles[current].freq = 1;
+  tile_t *tile = &tiles->tiles[current];
+  tile->kitty_id = kitty_id;
+  tile->level = level;
+  tile->si = left;
+  tile->sj = top;
+  tile->vi = 0; // TODO: Use these
+  tile->vj = 0;
+  tile->freq = 1;
   return current;
 }

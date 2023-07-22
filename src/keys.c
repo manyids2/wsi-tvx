@@ -131,11 +131,12 @@ void move_left(app_t *app) {
   view_t *view = app->view;
   world_t *world = app->world;
   tiles_t *tiles = app->tiles;
+  slide_t *slide = app->slide;
   int left = MAX(0, view->left - 1);
   if (left == view->left)
     return;
   view_update_left_top(view, left, view->top);
-  tiles_load_view(tiles, view, world);
+  tiles_load_view(tiles, slide, view, world);
 }
 
 void move_right(app_t *app) {
@@ -143,11 +144,12 @@ void move_right(app_t *app) {
   view_t *view = app->view;
   world_t *world = app->world;
   tiles_t *tiles = app->tiles;
+  slide_t *slide = app->slide;
   int left = MIN(view->smi - world->vmi, view->left + 1);
   if (left == view->left)
     return;
   view_update_left_top(view, left, view->top);
-  tiles_load_view(tiles, view, world);
+  tiles_load_view(tiles, slide, view, world);
 }
 
 void move_up(app_t *app) {
@@ -155,11 +157,12 @@ void move_up(app_t *app) {
   view_t *view = app->view;
   world_t *world = app->world;
   tiles_t *tiles = app->tiles;
+  slide_t *slide = app->slide;
   int top = MAX(0, view->top - 1);
   if (top == view->top)
     return;
   view_update_left_top(view, view->left, top);
-  tiles_load_view(tiles, view, world);
+  tiles_load_view(tiles, slide, view, world);
 }
 
 void move_down(app_t *app) {
@@ -167,11 +170,12 @@ void move_down(app_t *app) {
   view_t *view = app->view;
   world_t *world = app->world;
   tiles_t *tiles = app->tiles;
+  slide_t *slide = app->slide;
   int top = MIN(view->smj - world->vmj, view->top + 1);
   if (top == view->top)
     return;
   view_update_left_top(view, view->left, top);
-  tiles_load_view(tiles, view, world);
+  tiles_load_view(tiles, slide, view, world);
 }
 
 void zoom_in(app_t *app) {
@@ -185,7 +189,7 @@ void zoom_in(app_t *app) {
     return;
   view_update_level(view, slide, level);
   view_set_wx_wy(view, view->wx, view->wy);
-  tiles_load_view(tiles, view, world);
+  tiles_load_view(tiles, slide, view, world);
 }
 
 void zoom_out(app_t *app) {
@@ -199,7 +203,7 @@ void zoom_out(app_t *app) {
     return;
   view_update_level(view, slide, level);
   view_set_wx_wy(view, view->wx, view->wy);
-  tiles_load_view(tiles, view, world);
+  tiles_load_view(tiles, slide, view, world);
 }
 
 void toggle_thumbnail(app_t *app) {

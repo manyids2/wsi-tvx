@@ -62,7 +62,6 @@ typedef struct tile_t {
 } tile_t;
 
 typedef struct tiles_t {
-  openslide_t *osr; // Reference to slide to it can load tiles
   pthread_mutex_t *mutex;
   int current;
   tile_t tiles[MAX_TILE_CACHE];              // Loaded tiles and kitty_id
