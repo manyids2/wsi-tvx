@@ -9,7 +9,7 @@ void tiles_init(tiles_t *tiles);
 void tiles_free(tiles_t *tiles);
 
 void tiles_clear(tiles_t *tiles);
-void tiles_log(tiles_t *tiles, FILE *logfile);
+void tiles_log(tiles_t *tiles, view_t *view, world_t *world, FILE *logfile);
 void tiles_load_view(tiles_t *tiles, view_t *view, world_t *world);
 
 int tile_get(tiles_t *tiles, int level, int left, int top);

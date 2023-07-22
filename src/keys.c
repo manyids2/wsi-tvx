@@ -77,7 +77,7 @@ void handle_keypress(app_t *app, int c) {
 
   // Log
   case LOG_TILES:
-    tiles_log(app->tiles, app->logfile);
+    tiles_log(app->tiles, app->view, app->world, app->logfile);
     break;
 
   // Up

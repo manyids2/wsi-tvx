@@ -27,7 +27,7 @@ void app_init(app_t *app, char *slidepath) {
   setup_tiles(app);
 
   // Draw statusline
-  // app_draw_statusline(app);
+  app_draw_statusline(app);
 }
 
 void setup_slide(slide_t *slide, char *slidepath) {

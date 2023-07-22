@@ -8,7 +8,11 @@ void tiles_init(tiles_t *tiles) {
   tiles->mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
   if (pthread_mutex_init(tiles->mutex, NULL))
     die("LRU Cache unable to initialise mutex");
+
   tiles->current = 0;
+  for (int i = 0; i < MAX_TILE_CACHE; i++) {
+    tiles->tiles[i].kitty_id = 0;
+  }
 }
 
 void tiles_free(tiles_t *tiles) {
@@ -27,16 +31,47 @@ void tiles_clear(tiles_t *tiles) {
   }
 }
 
-void tiles_log(tiles_t *tiles, FILE *logfile) {
-  fprintf(logfile, "---------\r\n");
+void tiles_log(tiles_t *tiles, view_t *view, world_t *world, FILE *logfile) {
+  fprintf(logfile, "----view-----\n");
+
+  int level = view->level;
+  int left = view->left;
+  int top = view->top;
+  int vmi = world->vmi;
+  int vmj = world->vmj;
+  fprintf(logfile,
+          "    level: %d\n"
+          "left, top: %d, %d\n"
+          " vmi, vmj: %d, %d\n"
+          "",
+          level, left, top, vmi, vmj);
+
+  fprintf(logfile, "----visible-----\n");
+  int index, si, sj;
+  for (int i = 0; i < vmi; i++) {
+    for (int j = 0; j < vmj; j++) {
+      // Checks if loaded, else loads
+      si = i + left;
+      sj = j + top;
+      index = tile_get(tiles, level, si, sj);
+      if (index == -1)
+        index = tile_load(tiles, level, si, sj);
+
+      // Get kitty id and display in grid
+      uint32_t kitty_id = tiles->tiles[index].kitty_id;
+      fprintf(logfile, "%3d, %3d: %6u : %4d, %3d, %3d \n", i, j, kitty_id,
+              index, si, sj);
+    }
+  }
+
+  fprintf(logfile, "----cache-----\n");
   for (int i = 0; i < MAX_TILE_CACHE; i++) {
     tile_t t = tiles->tiles[i];
     if (t.kitty_id > 0)
       fprintf(logfile,
-              "%d: %u\n"
-              "  %d, %d, %d\n"
-              "  %d, %d, %d\n",
-              i, t.kitty_id, t.level, t.si, t.sj, t.vi, t.vj, t.freq);
+              "%3d: %6u : "
+              "  %3d, %3d, %3d \n",
+              i, t.kitty_id, t.level, t.si, t.sj);
   }
 }
 
@@ -73,8 +108,8 @@ int tile_get(tiles_t *tiles, int level, int left, int top) {
   tile_t tile;
   for (int index = 0; index < MAX_TILE_CACHE; index++) {
     tile = tiles->tiles[index];
-    if ((tile.kitty_id > 0) && (tile.level == level) && (tile.si == left) &&
-        (tile.sj == top)) {
+    if ((tile.kitty_id >= KITTY_ID_OFFSET) && (tile.level == level) &&
+        (tile.si == left) && (tile.sj == top)) {
       // Already loaded, so return index
       tile.freq += 1;
       return index;

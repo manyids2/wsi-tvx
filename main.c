@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
     handle_keypress(&app, c);
 
     // Render info
-    // app_draw_statusline(&app);
-    // app_draw_debug(&app);
+    app_draw_statusline(&app);
+    app_draw_debug(&app);
   }
 
   // Free memory
