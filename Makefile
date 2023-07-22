@@ -1,24 +1,39 @@
-NAME := wsi-tvx
-SRC_DIR := src
-BIN_DIR := bin
-TEST_DIR := tests
-TEST_BIN_DIR := tests/bin
-SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
-HDR_FILES := $(wildcard $(SRC_DIR)/*.h)
-TEST_FILES := $(wildcard $(TEST_DIR)/*.c)
+SRC_FILES := $(wildcard src/*.c)
+HDR_FILES := $(wildcard src/*.h)
 LDFLAGS := -lopenslide -lm -lev
 CXXFLAGS := -Wall -Wextra -pedantic -std=c99 -O3 -pg
 
-$(NAME): main.c $(SRC_FILES) $(HDR_FILES)
-	$(CC) main.c $(SRC_FILES) -o $(BIN_DIR)/$(NAME) $(LDFLAGS) $(CXXFLAGS)
+# --- wsi-tvx ---
 
-test: $(TEST_FILES) $(SRC_FILES) $(HDR_FILES)
-	# $(CC) $(TEST_DIR)/test-base64.c $(SRC_FILES) -o $(TEST_BIN_DIR)/test-base64 $(LDFLAGS) $(CXXFLAGS)
-	$(CC) $(TEST_DIR)/test-kitty.c $(SRC_FILES) -o $(TEST_BIN_DIR)/test-kitty $(LDFLAGS) $(CXXFLAGS)
-	# $(CC) $(TEST_DIR)/test-tiles.c $(SRC_FILES) -o $(TEST_BIN_DIR)/test-tiles $(LDFLAGS) $(CXXFLAGS)
-	# $(CC) $(TEST_DIR)/test-slide.c $(SRC_FILES) -o $(TEST_BIN_DIR)/test-slide $(LDFLAGS) $(CXXFLAGS)
-	# $(CC) $(TEST_DIR)/test-term.c $(SRC_FILES) -o $(TEST_BIN_DIR)/test-term $(LDFLAGS) $(CXXFLAGS)
+bin/wsi-tvx: main.c $(SRC_FILES) $(HDR_FILES)
+	$(CC) main.c $(SRC_FILES) -o bin/wsi-tvx $(LDFLAGS) $(CXXFLAGS)
+
+# --- tests ---
+
+tests/bin/test-kitty: tests/test-kitty.c $(SRC_FILES) $(HDR_FILES)
+	$(CC) tests/test-kitty.c $(SRC_FILES) -o tests/bin/test-kitty $(LDFLAGS) $(CXXFLAGS)
+
+tests/bin/test-base64: tests/test-base64.c $(SRC_FILES) $(HDR_FILES)
+	$(CC) tests/test-base64.c $(SRC_FILES) -o tests/bin/test-base64 $(LDFLAGS) $(CXXFLAGS)
+
+tests/bin/test-tiles: tests/test-tiles.c $(SRC_FILES) $(HDR_FILES)
+	$(CC) tests/test-tiles.c $(SRC_FILES) -o tests/bin/test-tiles $(LDFLAGS) $(CXXFLAGS)
+
+tests/bin/test-slide: tests/test-slide.c $(SRC_FILES) $(HDR_FILES)
+	$(CC) tests/test-slide.c $(SRC_FILES) -o tests/bin/test-slide $(LDFLAGS) $(CXXFLAGS)
+
+tests/bin/test-term: tests/test-term.c $(SRC_FILES) $(HDR_FILES)
+	$(CC) tests/test-term.c $(SRC_FILES) -o tests/bin/test-term $(LDFLAGS) $(CXXFLAGS)
+
+test:
+		make tests/bin/test-kitty
+		make tests/bin/test-base64
+		make tests/bin/test-tiles
+		make tests/bin/test-slide
+		make tests/bin/test-term
+
+# --- cleanup ---
 
 clean:
-	rm $(BIN_DIR)/$(NAME)
-	rm $(TEST_BIN_DIR)/test-*
+	rm bin/wsi-tvx
+	rm tests/bin/test-*

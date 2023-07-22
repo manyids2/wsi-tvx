@@ -4,7 +4,7 @@
 
 #define TILE_SIZE 2
 
-int main(int argc, char *argv[]) {
+int main(void) {
   // RGBAtoRGBbase64(size_t num_pixels, const uint32_t *buf, char *buf64)
   int num_pixels = TILE_SIZE * TILE_SIZE;
   uint32_t *buf = malloc(num_pixels * sizeof(uint32_t));
