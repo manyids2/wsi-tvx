@@ -8,20 +8,19 @@ void setup_term(void) {
 }
 
 void app_init(app_t *app, char *slidepath) {
+  WITH_WORLD_SLIDE
   // Setup logger
   app->logfile = fopen(LOG_FILE, "a+");
 
-  slide_t *slide = app->slide;
+  // Setup slide, world, show thumbnail
   setup_slide(slide, slidepath);
   setup_world(app);
   slide_toggle_thumbnail(app->slide, app->world, 1);
 
   // Start at minimum zoom, centered
-  int level = app->world->mlevel;
-  int64_t wx = app->world->ww / 2 -
-               (int)(app->world->vw * slide->downsamples[level] / 2);
-  int64_t wy = app->world->wh / 2 -
-               (int)(app->world->vh * slide->downsamples[level] / 2);
+  int level = world->mlevel;
+  int64_t wx = world->ww / 2 - (int)(world->vw * slide->downsamples[level] / 2);
+  int64_t wy = world->wh / 2 - (int)(world->vh * slide->downsamples[level] / 2);
   setup_view(app, level, wx, wy);
 
   // Tiles, including loading them
@@ -38,9 +37,7 @@ void setup_slide(slide_t *slide, char *slidepath) {
 }
 
 void setup_world(app_t *app) {
-  slide_t *slide = app->slide;
-  world_t *world = app->world;
-
+  WITH_WORLD_SLIDE
   // Values to retrieve
   int *rows = &app->world->rows;
   int *cols = &app->world->cols;
@@ -88,9 +85,7 @@ void setup_world(app_t *app) {
 }
 
 void setup_view(app_t *app, int level, int64_t wx, int64_t wy) {
-  view_t *view = app->view;
-  slide_t *slide = app->slide;
-
+  WITH_VIEW_SLIDE
   // Copy maximum tiles in view
   view->vmi = app->world->vmi;
   view->vmj = app->world->vmj;
@@ -103,22 +98,16 @@ void setup_view(app_t *app, int level, int64_t wx, int64_t wy) {
 }
 
 void setup_tiles(app_t *app) {
-  tiles_t *tiles = app->tiles;
-  slide_t *slide = app->slide;
-  view_t *view = app->view;
-  world_t *world = app->world;
-
+  WITH_WORLD_VIEW_SLIDE_TILES
   // Initialize mutex
   tiles_init(tiles);
 
   // Load current level
-  tiles_load_view(tiles, slide, view, world);
+  tiles_load_view(tiles, slide, view, world, 0);
 }
 
 void app_draw_statusline(app_t *app) {
-  slide_t *slide = app->slide;
-  world_t *world = app->world;
-  view_t *view = app->view;
+  WITH_WORLD_VIEW_SLIDE
   char s[256];
   int len;
 
@@ -133,9 +122,7 @@ void app_draw_statusline(app_t *app) {
 }
 
 void app_draw_debug_state(app_t *app) {
-  slide_t *slide = app->slide;
-  world_t *world = app->world;
-  view_t *view = app->view;
+  WITH_WORLD_VIEW_SLIDE
   char s[4096];
   int len =
       snprintf(s, sizeof(s),
@@ -189,10 +176,8 @@ void app_draw_debug(app_t *app) {
 }
 
 void app_free(app_t *app) {
-  slide_t *slide = app->slide;
-  tiles_t *tiles = app->tiles;
+  WITH_SLIDE_TILES
   tiles_free(tiles);
   slide_free(slide);
-
   fclose(app->logfile);
 }

@@ -1,5 +1,34 @@
 #pragma once
 
+// ---  Contexts  ---
+#define WITH_WORLD_SLIDE                                                       \
+  world_t *world = app->world;                                                 \
+  slide_t *slide = app->slide;
+
+#define WITH_VIEW_SLIDE                                                        \
+  view_t *view = app->view;                                                    \
+  slide_t *slide = app->slide;
+
+#define WITH_VIEW_SLIDE_TILES                                                  \
+  view_t *view = app->view;                                                    \
+  slide_t *slide = app->slide;                                                 \
+  tiles_t *tiles = app->tiles;
+
+#define WITH_WORLD_VIEW_SLIDE_TILES                                            \
+  world_t *world = app->world;                                                 \
+  view_t *view = app->view;                                                    \
+  slide_t *slide = app->slide;                                                 \
+  tiles_t *tiles = app->tiles;
+
+#define WITH_WORLD_VIEW_SLIDE                                                  \
+  world_t *world = app->world;                                                 \
+  view_t *view = app->view;                                                    \
+  slide_t *slide = app->slide;
+
+#define WITH_SLIDE_TILES                                                       \
+  slide_t *slide = app->slide;                                                 \
+  tiles_t *tiles = app->tiles;
+
 // ---  Slide  ---
 #define MAX_PATH_LENGTH 1024
 #define MAX_LEVELS 32
@@ -57,6 +86,7 @@ enum keys_e {
   TOGGLE_DEBUG = 8,
   LOG_TILES = 9,
   QUIT = 10,
+  RELOAD = 11,
 };
 
 // --- Debug ---

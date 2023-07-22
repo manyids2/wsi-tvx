@@ -42,6 +42,8 @@ int parse_input(void) {
     switch (c) {
     case 'q':
       return QUIT;
+    case 'r':
+      return RELOAD;
     case 'k':
       return MOVE_UP;
     case 'j':
@@ -78,6 +80,11 @@ void handle_keypress(app_t *app, int c) {
   // Log
   case LOG_TILES:
     tiles_log(app->tiles, app->view, app->world, app->logfile);
+    break;
+
+  // Log
+  case RELOAD:
+    tiles_load_view(app->tiles, app->slide, app->view, app->world, 1);
     break;
 
   // Up
@@ -136,7 +143,7 @@ void move_left(app_t *app) {
   if (left == view->left)
     return;
   view_update_left_top(view, left, view->top);
-  tiles_load_view(tiles, slide, view, world);
+  tiles_load_view(tiles, slide, view, world, 0);
 }
 
 void move_right(app_t *app) {
@@ -149,7 +156,7 @@ void move_right(app_t *app) {
   if (left == view->left)
     return;
   view_update_left_top(view, left, view->top);
-  tiles_load_view(tiles, slide, view, world);
+  tiles_load_view(tiles, slide, view, world, 0);
 }
 
 void move_up(app_t *app) {
@@ -162,7 +169,7 @@ void move_up(app_t *app) {
   if (top == view->top)
     return;
   view_update_left_top(view, view->left, top);
-  tiles_load_view(tiles, slide, view, world);
+  tiles_load_view(tiles, slide, view, world, 0);
 }
 
 void move_down(app_t *app) {
@@ -175,7 +182,7 @@ void move_down(app_t *app) {
   if (top == view->top)
     return;
   view_update_left_top(view, view->left, top);
-  tiles_load_view(tiles, slide, view, world);
+  tiles_load_view(tiles, slide, view, world, 0);
 }
 
 void zoom_in(app_t *app) {
@@ -189,7 +196,7 @@ void zoom_in(app_t *app) {
     return;
   view_update_level(view, slide, level);
   view_set_wx_wy(view, view->wx, view->wy);
-  tiles_load_view(tiles, slide, view, world);
+  tiles_load_view(tiles, slide, view, world, 0);
 }
 
 void zoom_out(app_t *app) {
@@ -203,7 +210,7 @@ void zoom_out(app_t *app) {
     return;
   view_update_level(view, slide, level);
   view_set_wx_wy(view, view->wx, view->wy);
-  tiles_load_view(tiles, slide, view, world);
+  tiles_load_view(tiles, slide, view, world, 0);
 }
 
 void toggle_thumbnail(app_t *app) {

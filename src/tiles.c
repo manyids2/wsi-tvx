@@ -74,9 +74,17 @@ void tiles_log(tiles_t *tiles, view_t *view, world_t *world, FILE *logfile) {
 }
 
 void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
-                     world_t *world) {
+                     world_t *world, int force) {
   // First clear all tiles
   tiles_clear(tiles);
+
+  // Reset everything if force
+  if (force) {
+    clear_screen();
+    for (int i = 0; i < MAX_TILE_CACHE; i++) {
+      tiles->tiles[i].kitty_id = 0;
+    }
+  }
 
   int level = view->level;
   int left = view->left;
@@ -102,11 +110,18 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
     kitty_display(kitty_id, pos.row, pos.col, pos.X, pos.Y, -2);               \
   }
 
-#define ONLY_LOAD                                                              \
-  index = tile_get(tiles, level, si, sj);                                      \
-  if (index == -1) {                                                           \
+#define ONLY_LOAD_OR_FORCE_LOAD                                                \
+  if (!force) {                                                                \
+    index = tile_get(tiles, level, si, sj);                                    \
+    if (index == -1) {                                                         \
+      index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);         \
+    }                                                                          \
+  } else {                                                                     \
     index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);           \
   }
+
+#define FORCE_LOAD                                                             \
+  index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
 
   // First display what is already there, do not load anything
   for (int i = 0; i < vmi; i++) {
@@ -114,7 +129,11 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
       pos_t pos = world->pos[i * vmj + j];
       si = i + left;
       sj = j + top;
-      FIND_AND_DISPLAY
+      if (!force) {
+        FIND_AND_DISPLAY
+      } else {
+        FORCE_LOAD
+      }
     }
   }
 
@@ -136,11 +155,11 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
 
       // left border
       si = MAX(left - i, 0);
-      ONLY_LOAD
+      ONLY_LOAD_OR_FORCE_LOAD
 
       // right border
       si = MIN(left + vmi + i, smi - 1);
-      ONLY_LOAD
+      ONLY_LOAD_OR_FORCE_LOAD
     }
   }
 
@@ -151,11 +170,11 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
 
       // top border
       sj = MAX(top - j, 0);
-      ONLY_LOAD
+      ONLY_LOAD_OR_FORCE_LOAD
 
       // bottom border
       sj = MIN(top + vmj + j, smj - 1);
-      ONLY_LOAD
+      ONLY_LOAD_OR_FORCE_LOAD
     }
   }
 
