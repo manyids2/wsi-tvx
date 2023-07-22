@@ -2,33 +2,6 @@
 #include "constants.h"
 #include "term.h"
 
-void kittyProvisionImage(int index, int w, int h, char *buf64) {
-  /*
-   * Switch to RGB to get gains on base64 encoding
-   *
-   * <ESC>_Gf=24,s=<w>,v=<h>,m=1;<encoded pixel data first chunk><ESC>\
-   * <ESC>_Gm=1;<encoded pixel data second chunk><ESC>\
-   * <ESC>_Gm=0;<encoded pixel data last chunk><ESC>\
-   */
-  size_t sent_bytes = 0;
-  size_t base64_size = w * h * sizeof(uint32_t);
-  while (sent_bytes < base64_size) {
-    size_t chunk_size =
-        base64_size - sent_bytes < CHUNK ? base64_size - sent_bytes : CHUNK;
-    int cont = !!(sent_bytes + chunk_size < base64_size);
-    if (sent_bytes == 0) {
-      fprintf(stdout, "\x1B_Gt=d,f=24,q=2,i=%u,s=%d,v=%d,m=%d%s;", index, w, h,
-              cont, "");
-    } else {
-      fprintf(stdout, "\x1B_Gm=%d;", cont);
-    }
-    fwrite(buf64 + sent_bytes, chunk_size, 1, stdout);
-    fprintf(stdout, "\x1B\\");
-    sent_bytes += chunk_size;
-  }
-  fflush(stdout);
-}
-
 void kitty_provision(uint32_t kitty_id, int w, int h, char *buf64) {
   /*
    * Switch to RGB to get gains on base64 encoding

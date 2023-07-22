@@ -15,6 +15,4 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
 
 int tile_get(tiles_t *tiles, int level, int left, int top);
 int tile_load(tiles_t *tiles, openslide_t *osr, double zoom, int level,
-               int left, int top);
-
-void kittyProvisionImage(int index, int w, int h, char *buf64);
+              int left, int top);
