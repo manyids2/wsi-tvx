@@ -73,10 +73,7 @@ void get_window_size_kitty(int *vw, int *vh) {
     // save char to string
     str[n] = ch;
 
-    // check break conditions
-    if (ch == 't') {
-      break;
-    }
+    // save positions in string
     if (ch == ';') {
       p1 == -1 ? (p1 = n) : (p2 = n);
     }

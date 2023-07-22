@@ -51,7 +51,7 @@ void setup_world(app_t *app) {
   get_window_size(rows, cols, fvw, fvh);
 
   // TODO: Not working
-  // get_window_size_kitty(vw, vh);
+  // get_window_size_kitty(fvw, fvh);
 
   // Compute character dims
   world->cw = world->fvw / world->cols;
