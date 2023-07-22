@@ -25,6 +25,7 @@ make
 ## Keys
 
 - `q` - quit
+- `r` - reload
 - `d` - toggle debug info
 - `t` - toggle thumbnail
 
@@ -43,9 +44,8 @@ make
 
 ## Issues
 
+- Crashes sometimes, use `r` to reset.
 - Tile positions are not always correct.
-- If it crashes, kitty needs to be reset.
-  - use `reset`
 - Not optimal base64
   - Use [race64](https://github.com/skeeto/race64) for base64 encoding ( with SIMD optimizations ).
 
