@@ -1,7 +1,7 @@
 SRC_FILES := $(wildcard src/*.c)
 HDR_FILES := $(wildcard src/*.h)
 LDFLAGS := -lopenslide -lm
-TESTLDFLAGS := -lopenslide -lm -lev -lunistring
+TESTLDFLAGS := -lopenslide -lm -lev -lunistring -lpthread
 CXXFLAGS := -Wall -Wextra -pedantic -std=c99 -O3 -pg
 
 # --- wsi-tvx ---
