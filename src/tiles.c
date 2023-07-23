@@ -33,7 +33,6 @@ void tiles_clear(tiles_t *tiles) {
 
 void tiles_log(tiles_t *tiles, view_t *view, world_t *world, FILE *logfile) {
   fprintf(logfile, "----view-----\n");
-
   int level = view->level;
   int left = view->left;
   int top = view->top;
