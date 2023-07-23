@@ -124,70 +124,59 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
 #define FORCE_LOAD                                                             \
   index = tile_load(tiles, slide->osr, view->zoom, level, si, sj);
 
-  // First display what is already there, do not load anything
-  for (int i = 0; i < vmi; i++) {
-    for (int j = 0; j < vmj; j++) {
-      pos_t pos = world->pos[i * vmj + j];
-      si = i + left;
-      sj = j + top;
-      if (!force) {
-        FIND_AND_DISPLAY
-      } else {
-        FORCE_LOAD
-      }
-    }
+#define ITERATE_OVER(imax, jmax)                                               \
+  for (int i = 0; i < imax; i++) {                                             \
+    for (int j = 0; j < jmax; j++) {
+
+#define ITERATE_END                                                            \
+  }                                                                            \
   }
+
+  // First display what is already there, do not load anything
+  ITERATE_OVER(vmi, vmj)
+  pos_t pos = world->pos[i * vmj + j];
+  si = i + left;
+  sj = j + top;
+  if (!force) {
+    FIND_AND_DISPLAY
+  } else {
+    FORCE_LOAD
+  }
+  ITERATE_END
 
   // Then handle requests - load and display immediately
-  for (int i = 0; i < vmi; i++) {
-    for (int j = 0; j < vmj; j++) {
-      pos_t pos = world->pos[i * vmj + j];
-      // Checks if loaded, else loads
-      si = i + left;
-      sj = j + top;
-      LOAD_AND_DISPLAY
-    }
-  }
+  ITERATE_OVER(vmi, vmj)
+  pos_t pos = world->pos[i * vmj + j];
+  si = i + left;
+  sj = j + top;
+  LOAD_AND_DISPLAY
+  ITERATE_END
 
-  // Then handle cache - left and right - only load
-  for (int i = 0; i <= MARGIN_CACHE; i++) {
-    for (int j = 0; j < vmj; j++) {
-      sj = top + j;
-
-      // left border
-      si = MAX(left - i, 0);
-      ONLY_LOAD_OR_FORCE_LOAD
-
-      // right border
-      si = MIN(left + vmi + i, smi - 1);
-      ONLY_LOAD_OR_FORCE_LOAD
-    }
-  }
+  // Then handle cache - left and right border - only load
+  ITERATE_OVER(MARGIN_CACHE + 1, vmj)
+  sj = top + j;
+  si = MAX(left - i, 0); // left
+  ONLY_LOAD_OR_FORCE_LOAD
+  si = MIN(left + vmi + i, smi - 1); // right
+  ONLY_LOAD_OR_FORCE_LOAD
+  ITERATE_END
 
   // Then handle cache - top and bottom - only load
-  for (int i = 0; i < vmi; i++) {
-    for (int j = 0; j <= MARGIN_CACHE; j++) {
-      si = left + i;
+  ITERATE_OVER(vmi, MARGIN_CACHE + 1)
+  si = left + i;
+  sj = MAX(top - j, 0); // top
+  ONLY_LOAD_OR_FORCE_LOAD
+  sj = MIN(top + vmj + j, smj - 1); // bottom
+  ONLY_LOAD_OR_FORCE_LOAD
+  ITERATE_END
 
-      // top border
-      sj = MAX(top - j, 0);
-      ONLY_LOAD_OR_FORCE_LOAD
-
-      // bottom border
-      sj = MIN(top + vmj + j, smj - 1);
-      ONLY_LOAD_OR_FORCE_LOAD
-    }
-  }
-
-  // Redraw just to make sure
-  for (int i = 0; i < vmi; i++) {
-    for (int j = 0; j < vmj; j++) {
-      pos_t pos = world->pos[i * vmj + j];
-      si = i + left;
-      sj = j + top;
-      FIND_AND_DISPLAY
-    }
-  }
+  // Redraw just to make sure everything is drawn after requests
+  ITERATE_OVER(vmi, vmj)
+  pos_t pos = world->pos[i * vmj + j];
+  si = i + left;
+  sj = j + top;
+  FIND_AND_DISPLAY
+  ITERATE_END
 }
 
 int tile_get(tiles_t *tiles, int level, int left, int top) {

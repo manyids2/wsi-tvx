@@ -70,62 +70,35 @@ int parse_input(void) {
 
 void handle_keypress(app_t *app, int c) {
   switch (c) {
-  // Quit
   case QUIT:
   case (CTRL_KEY('q')):
     app->last_pressed = QUIT;
     exit(EXIT_SUCCESS);
     break;
 
-  // Log
-  case LOG_TILES:
-    tiles_log(app->tiles, app->view, app->world, app->logfile);
+  case LOG_TILES: {
+    WITH_WORLD_VIEW_TILES
+    tiles_log(tiles, view, world, app->logfile);
+  } break;
+
+  case RELOAD: {
+    WITH_WORLD_VIEW_SLIDE_TILES
+    tiles_load_view(tiles, slide, view, world, 1);
+  } break;
+
+#define CASE_KEYPRESS(action, func)                                            \
+  case action:                                                                 \
+    func(app);                                                                 \
     break;
 
-  // Log
-  case RELOAD:
-    tiles_load_view(app->tiles, app->slide, app->view, app->world, 1);
-    break;
-
-  // Up
-  case MOVE_UP:
-    move_up(app);
-    break;
-
-  // Down
-  case MOVE_DOWN:
-    move_down(app);
-    break;
-
-  // Left
-  case MOVE_LEFT:
-    move_left(app);
-    break;
-
-  // Right
-  case MOVE_RIGHT:
-    move_right(app);
-    break;
-
-  // Zoom in
-  case ZOOM_IN:
-    zoom_in(app);
-    break;
-
-  // Zoom out
-  case ZOOM_OUT:
-    zoom_out(app);
-    break;
-
-  // Toggle thumbnail
-  case TOGGLE_THUMBNAIL:
-    toggle_thumbnail(app);
-    break;
-
-  // Debug info
-  case TOGGLE_DEBUG:
-    toggle_debug(app);
-    break;
+    CASE_KEYPRESS(MOVE_UP, move_up);
+    CASE_KEYPRESS(MOVE_DOWN, move_down);
+    CASE_KEYPRESS(MOVE_LEFT, move_left);
+    CASE_KEYPRESS(MOVE_RIGHT, move_right);
+    CASE_KEYPRESS(ZOOM_IN, zoom_in);
+    CASE_KEYPRESS(ZOOM_OUT, zoom_out);
+    CASE_KEYPRESS(TOGGLE_THUMBNAIL, toggle_thumbnail);
+    CASE_KEYPRESS(TOGGLE_DEBUG, toggle_debug);
 
   default:
     app->last_pressed = INIT;
@@ -133,84 +106,63 @@ void handle_keypress(app_t *app, int c) {
   }
 }
 
-void move_left(app_t *app) {
-  app->last_pressed = MOVE_LEFT;
-  view_t *view = app->view;
-  world_t *world = app->world;
-  tiles_t *tiles = app->tiles;
-  slide_t *slide = app->slide;
-  int left = MAX(0, view->left - 1);
-  if (left == view->left)
-    return;
-  view_update_left_top(view, left, view->top);
+#define MOVE_IF_CHANGED(key)                                                   \
+  if (key == view->key)                                                        \
+    return;                                                                    \
+  view_update_left_top(view, left, top);                                       \
   tiles_load_view(tiles, slide, view, world, 0);
+
+#define ZOOM_IF_CHANGED(key)                                                   \
+  if (key == view->key)                                                        \
+    return;                                                                    \
+  view_update_level(view, slide, level);                                       \
+  view_set_wx_wy(view, view->wx, view->wy);                                    \
+  tiles_load_view(tiles, slide, view, world, 0);
+
+void move_left(app_t *app) {
+  WITH_WORLD_VIEW_SLIDE_TILES
+  app->last_pressed = MOVE_LEFT;
+  int left = MAX(0, view->left - 1);
+  int top = view->top;
+  MOVE_IF_CHANGED(left)
 }
 
 void move_right(app_t *app) {
+  WITH_WORLD_VIEW_SLIDE_TILES
   app->last_pressed = MOVE_RIGHT;
-  view_t *view = app->view;
-  world_t *world = app->world;
-  tiles_t *tiles = app->tiles;
-  slide_t *slide = app->slide;
   int left = MIN(view->smi - world->vmi, view->left + 1);
-  if (left == view->left)
-    return;
-  view_update_left_top(view, left, view->top);
-  tiles_load_view(tiles, slide, view, world, 0);
+  int top = view->top;
+  MOVE_IF_CHANGED(left)
 }
 
 void move_up(app_t *app) {
+  WITH_WORLD_VIEW_SLIDE_TILES
   app->last_pressed = MOVE_UP;
-  view_t *view = app->view;
-  world_t *world = app->world;
-  tiles_t *tiles = app->tiles;
-  slide_t *slide = app->slide;
   int top = MAX(0, view->top - 1);
-  if (top == view->top)
-    return;
-  view_update_left_top(view, view->left, top);
-  tiles_load_view(tiles, slide, view, world, 0);
+  int left = view->left;
+  MOVE_IF_CHANGED(top)
 }
 
 void move_down(app_t *app) {
+  WITH_WORLD_VIEW_SLIDE_TILES
   app->last_pressed = MOVE_DOWN;
-  view_t *view = app->view;
-  world_t *world = app->world;
-  tiles_t *tiles = app->tiles;
-  slide_t *slide = app->slide;
   int top = MIN(view->smj - world->vmj, view->top + 1);
-  if (top == view->top)
-    return;
-  view_update_left_top(view, view->left, top);
-  tiles_load_view(tiles, slide, view, world, 0);
+  int left = view->left;
+  MOVE_IF_CHANGED(top)
 }
 
 void zoom_in(app_t *app) {
+  WITH_WORLD_VIEW_SLIDE_TILES
   app->last_pressed = ZOOM_IN;
-  view_t *view = app->view;
-  slide_t *slide = app->slide;
-  world_t *world = app->world;
-  tiles_t *tiles = app->tiles;
   int level = MAX(0, view->level - 1);
-  if (level == view->level)
-    return;
-  view_update_level(view, slide, level);
-  view_set_wx_wy(view, view->wx, view->wy);
-  tiles_load_view(tiles, slide, view, world, 0);
+  ZOOM_IF_CHANGED(level)
 }
 
 void zoom_out(app_t *app) {
+  WITH_WORLD_VIEW_SLIDE_TILES
   app->last_pressed = ZOOM_OUT;
-  view_t *view = app->view;
-  slide_t *slide = app->slide;
-  world_t *world = app->world;
-  tiles_t *tiles = app->tiles;
   int level = MIN(world->mlevel, view->level + 1);
-  if (level == view->level)
-    return;
-  view_update_level(view, slide, level);
-  view_set_wx_wy(view, view->wx, view->wy);
-  tiles_load_view(tiles, slide, view, world, 0);
+  ZOOM_IF_CHANGED(level)
 }
 
 void toggle_thumbnail(app_t *app) {

@@ -25,6 +25,11 @@
   view_t *view = app->view;                                                    \
   slide_t *slide = app->slide;
 
+#define WITH_WORLD_VIEW_TILES                                                  \
+  world_t *world = app->world;                                                 \
+  view_t *view = app->view;                                                    \
+  tiles_t *tiles = app->tiles;
+
 #define WITH_SLIDE_TILES                                                       \
   slide_t *slide = app->slide;                                                 \
   tiles_t *tiles = app->tiles;
