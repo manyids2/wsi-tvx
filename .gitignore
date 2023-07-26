@@ -2,13 +2,16 @@
 compile_commands.json
 .cache
 
-# executables
+# binaries
 bin/
+tests/bin
+
+# documentation
+docs/
 
 # profiling
 gmon.out
-gmon.txt
+gmon*.txt
 
+# debugging
 debug.log
-gmon_parallel.txt
-gmon_serial.txt

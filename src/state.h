@@ -1,3 +1,13 @@
+/*
+ *  Defines main structures used to group information.
+ *
+ *  `slide_t` : 
+ *  `world_t` : 
+ *  `view_t`  :
+ *  `tiles_t` :
+ *  `tile_t`  :
+ *  `app_t`   :
+ */
 #pragma once
 
 #include "constants.h"
@@ -5,7 +15,9 @@
 #include <openslide/openslide.h>
 #include <pthread.h>
 
-// ---  Slide  ---
+/* ---  Slide  ---
+ * Structure to hold slide related information read from openslide.
+ */
 typedef struct slide_t {
   openslide_t *osr;
 
