@@ -44,6 +44,7 @@
 
 // ---  View  ---
 #define TILE_SIZE 256
+#define NUM_PIXELS (TILE_SIZE * TILE_SIZE)
 #define MAX_COLS 6
 #define MAX_ROWS 4
 #define MAX_WIDTH 1536
@@ -138,3 +139,42 @@ enum debug_e {
 // --- string ---
 #define slice(str, result, start, end)                                         \
   strncpy(result, str + start, end - start);
+
+// --- Threads ---
+
+#define dieerr(s, msg)                                                         \
+  if (s != 0) {                                                                \
+    perror(msg);                                                               \
+    exit(EXIT_FAILURE);                                                        \
+  }
+
+#define LOAD_TILE_THREADED(buf, buf64)                                         \
+  int64_t sx = (args->tile->si * TILE_SIZE) * args->zoom;                      \
+  int64_t sy = (args->tile->sj * TILE_SIZE) * args->zoom;                      \
+  openslide_read_region(args->osr, buf, sx, sy, args->tile->level, TILE_SIZE,  \
+                        TILE_SIZE);                                            \
+  assert(openslide_get_error(args->osr) == NULL);                              \
+  RGBAtoRGBbase64(TILE_SIZE *TILE_SIZE, buf, buf64);
+
+#define PROVISION_TILE_THREADED(kitty_id, buf64)                               \
+  kitty_provision(kitty_id, TILE_SIZE, TILE_SIZE, buf64);
+
+#define SETUP_THREAD_BUFFERS                                                   \
+  __thread uint32_t tbuf[NUM_PIXELS] = {0};                                    \
+  __thread char tbuf64[NUM_PIXELS * 4 + 1] = {0};
+
+#define LOCK_MUTEX                                                             \
+  s = pthread_mutex_lock(&tiles->threadMutex);                                 \
+  dieerr(s, "pthread_mutex_lock");
+
+#define UNLOCK_MUTEX                                                           \
+  s = pthread_mutex_unlock(&tiles->threadMutex);                               \
+  dieerr(s, "pthread_mutex_unlock");
+
+#define COND_SIGNAL_MUTEX                                                      \
+  s = pthread_cond_signal(&tiles->threadDied);                                 \
+  dieerr(s, "pthread_cond_signal");
+
+#define COND_WAIT_MUTEX                                                        \
+  s = pthread_cond_wait(&tiles->threadDied, &tiles->threadMutex);              \
+  dieerr(s, "pthread_cond_wait");

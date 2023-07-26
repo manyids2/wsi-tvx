@@ -67,6 +67,8 @@ typedef struct tiles_t {
   tile_t tiles[MAX_TILE_CACHE];              // Loaded tiles and kitty_id
   uint32_t buf[TILE_SIZE * TILE_SIZE];       // Buffer for openslide
   char buf64[TILE_SIZE * TILE_SIZE * 4 + 1]; // Buffer for kitty
+  pthread_cond_t threadDied;
+  pthread_mutex_t threadMutex;
 } tiles_t;
 
 typedef struct thread_info {

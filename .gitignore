@@ -10,3 +10,5 @@ gmon.out
 gmon.txt
 
 debug.log
+gmon_parallel.txt
+gmon_serial.txt

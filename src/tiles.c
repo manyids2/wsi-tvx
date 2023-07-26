@@ -131,7 +131,7 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
   }                                                                            \
   }
 
-  // First display what is already there, do not load anything
+  // VISIBLE: First display what is already there, do not load anything
   ITERATE_OVER(vmi, vmj)
   pos_t pos = world->pos[i * vmj + j];
   si = i + left;
@@ -143,7 +143,8 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
   }
   ITERATE_END
 
-  // Then handle requests - load and display immediately
+  // VISIBLE: Then handle requests - load and display immediately
+  // This part should be multithreaded
   ITERATE_OVER(vmi, vmj)
   pos_t pos = world->pos[i * vmj + j];
   si = i + left;
@@ -151,7 +152,8 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
   LOAD_AND_DISPLAY
   ITERATE_END
 
-  // Then handle cache - left and right border - only load
+  // MARGIN: Then handle cache - left and right border - only load
+  // This part should be multithreaded
   ITERATE_OVER(MARGIN_CACHE + 1, vmj)
   sj = top + j;
   si = MAX(left - i, 0); // left
@@ -160,7 +162,8 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
   ONLY_LOAD_OR_FORCE_LOAD
   ITERATE_END
 
-  // Then handle cache - top and bottom - only load
+  // MARGIN: Then handle cache - top and bottom - only load
+  // This part should be multithreaded
   ITERATE_OVER(vmi, MARGIN_CACHE + 1)
   si = left + i;
   sj = MAX(top - j, 0); // top
@@ -169,7 +172,7 @@ void tiles_load_view(tiles_t *tiles, slide_t *slide, view_t *view,
   ONLY_LOAD_OR_FORCE_LOAD
   ITERATE_END
 
-  // Redraw just to make sure everything is drawn after requests
+  // VISIBLE: Redraw just to make sure everything is drawn after requests
   ITERATE_OVER(vmi, vmj)
   pos_t pos = world->pos[i * vmj + j];
   si = i + left;
@@ -223,5 +226,64 @@ int tile_load(tiles_t *tiles, openslide_t *osr, double zoom, int level,
   tile->vi = 0; // TODO: Use these
   tile->vj = 0;
   tile->freq = 1;
+  return current;
+}
+
+__thread uint32_t tbuf[NUM_PIXELS] = {0};
+__thread char tbuf64[NUM_PIXELS * 4 + 1] = {0};
+
+typedef struct args_t {
+  tile_t *tile;
+  tiles_t *tiles;
+  openslide_t *osr;
+  double zoom;
+} args_t;
+
+static void *threaded_alloc_once(args_t *args) {
+  tiles_t *tiles = args->tiles;
+
+  // Load, encode concurrently
+  LOAD_TILE_THREADED(tbuf, tbuf64)
+
+  // Lock before output to stdout
+  int s;
+  LOCK_MUTEX
+  PROVISION_TILE_THREADED(args->tile->kitty_id, tbuf64)
+  UNLOCK_MUTEX
+
+  return NULL;
+}
+
+int tile_load_threaded(tiles_t *tiles, openslide_t *osr, double zoom, int level,
+                       int left, int top) {
+
+  int s;
+  LOCK_MUTEX
+
+  // FIFO kind of cache
+  int current = (tiles->current + 1) % MAX_TILE_CACHE;
+  tiles->current = current;
+  uint32_t kitty_id = current + KITTY_ID_OFFSET;
+
+  // Register tile
+  tile_t *tile = &tiles->tiles[current];
+  tile->kitty_id = kitty_id; // Indicate loading
+  tile->level = level;
+  tile->si = left;
+  tile->sj = top;
+  tile->vi = 0; // TODO: Use these
+  tile->vj = 0;
+  tile->freq = 1;
+
+  UNLOCK_MUTEX
+
+  pthread_t tid; // We throw this away anyways
+  args_t *args = {0};
+  args->tile = tile;
+  args->tiles = tiles;
+  args->zoom = zoom;
+  args->osr = osr;
+  s = pthread_create(&tid, NULL, threaded_alloc_once, (void *)args);
+
   return current;
 }

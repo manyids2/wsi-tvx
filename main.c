@@ -6,17 +6,21 @@
 #include <unistd.h>
 
 // Initialize app
-slide_t slide = {0};
-world_t world = {0};
-view_t view = {0};
-tiles_t tiles = {0};
-app_t app = {.slide = &slide,
-             .world = &world,
-             .view = &view,
-             .tiles = &tiles,
-             .debug = DEBUG_NONE,
-             .thumb = 1,
-             .last_pressed = INIT};
+static slide_t slide = {0};
+static world_t world = {0};
+static view_t view = {0};
+static tiles_t tiles = {.threadDied = PTHREAD_COND_INITIALIZER,
+                        .threadMutex = PTHREAD_MUTEX_INITIALIZER};
+
+static app_t app = {
+    .slide = &slide,
+    .world = &world,
+    .view = &view,
+    .tiles = &tiles,
+    .debug = DEBUG_NONE,
+    .thumb = 1,
+    .last_pressed = INIT,
+};
 
 int main(int argc, char **argv) {
   if (argc != 2) {

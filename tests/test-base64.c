@@ -24,9 +24,9 @@
  *
  */
 
-#define NUM_PIXELS (256 * 256 * 32)
-#define NUM_ROWS 64
-#define NUM_COLS 64
+#define NUM_PIXELS (256 * 256)
+#define NUM_ROWS 128
+#define NUM_COLS 128
 
 slide_t slide = {0};
 
@@ -57,7 +57,7 @@ static struct {        /* Info about each thread */
     exit(EXIT_FAILURE);                                                        \
   }
 
-#define LOAD_TILE                                                              \
+#define LOAD_TILE(buf, buf64)                                                  \
   double zoom = slide.downsamples[level];                                      \
   int64_t sx = (col * TILE_SIZE) * zoom;                                       \
   int64_t sy = (row * TILE_SIZE) * zoom;                                       \
@@ -65,7 +65,7 @@ static struct {        /* Info about each thread */
   assert(openslide_get_error(slide.osr) == NULL);                              \
   RGBAtoRGBbase64(TILE_SIZE *TILE_SIZE, buf, buf64);
 
-#define PRINT_TILE                                                             \
+#define PRINT_TILE(buf64)                                                      \
   kitty_provision(KITTY_ID_OFFSET, TILE_SIZE, TILE_SIZE, buf64);               \
   kitty_display(KITTY_ID_OFFSET, 5, 5, 0, 0, 1);
 
@@ -76,6 +76,10 @@ static struct {        /* Info about each thread */
 #define SETUP_BUFFERS                                                          \
   uint32_t *buf = malloc(NUM_PIXELS * sizeof(uint32_t));                       \
   char *buf64 = malloc(NUM_PIXELS * sizeof(uint32_t) + 1);
+
+#define SETUP_THREAD_BUFFERS                                                   \
+  __thread uint32_t tbuf[NUM_PIXELS] = {0};                                    \
+  __thread char tbuf64[NUM_PIXELS * 4 + 1] = {0};
 
 #define FREE_BUFFERS                                                           \
   free(buf);                                                                   \
@@ -97,7 +101,7 @@ static struct {        /* Info about each thread */
   s = pthread_cond_wait(&threadDied, &threadMutex);                            \
   dieerr(s, "pthread_cond_wait");
 
-static void *threadFunc(void *arg) {
+static void *threaded_alloc_each_time(void *arg) {
   // Setup
   int idx = (int)arg;
   int s, level, col, row;
@@ -107,11 +111,11 @@ static void *threadFunc(void *arg) {
 
   // allocate, load
   SETUP_BUFFERS
-  LOAD_TILE
+  LOAD_TILE(buf, buf64)
 
   // locked write to stdout
   LOCK_MUTEX
-  PRINT_TILE
+  PRINT_TILE(buf64)
   numUnjoined++;
   thread[idx].state = TS_TERMINATED;
   UNLOCK_MUTEX
@@ -123,14 +127,40 @@ static void *threadFunc(void *arg) {
   return NULL;
 }
 
+SETUP_THREAD_BUFFERS
+
+static void *threaded_alloc_once(void *arg) {
+  // Setup
+  int idx = (int)arg;
+  int s, level, col, row;
+  level = thread[idx].level;
+  col = thread[idx].col;
+  row = thread[idx].row;
+
+  // allocate, load
+  LOAD_TILE(tbuf, tbuf64)
+
+  // locked write to stdout
+  LOCK_MUTEX
+  PRINT_TILE(tbuf64)
+  numUnjoined++;
+  thread[idx].state = TS_TERMINATED;
+  UNLOCK_MUTEX
+
+  // free and join
+  COND_SIGNAL_MUTEX
+
+  return NULL;
+}
+
 void test_serial(void) {
   int level = 0;
   PRINT_INFO
   SETUP_BUFFERS
   for (int row = 0; row < NUM_ROWS; row++) {
     for (int col = 0; col < NUM_COLS; col++) {
-      LOAD_TILE
-      PRINT_TILE
+      LOAD_TILE(buf, buf64)
+      PRINT_TILE(buf64)
     }
   }
   FREE_BUFFERS
@@ -154,7 +184,8 @@ void test_parallel(void) {
       thread[idx].col = col;
       thread[idx].row = row;
       thread[idx].state = TS_ALIVE;
-      s = pthread_create(&thread[idx].tid, NULL, threadFunc, (void *)idx);
+      s = pthread_create(&thread[idx].tid, NULL, threaded_alloc_once,
+                         (void *)idx);
       dieerr(s, "pthread_create");
     }
   }

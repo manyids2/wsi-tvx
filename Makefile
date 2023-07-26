@@ -1,6 +1,6 @@
 SRC_FILES := $(wildcard src/*.c)
 HDR_FILES := $(wildcard src/*.h)
-LDFLAGS := -lopenslide -lm
+LDFLAGS := -lopenslide -lm -lpthread
 TESTLDFLAGS := -lopenslide -lm -lev -lunistring -lpthread
 CXXFLAGS := -Wall -Wextra -pedantic -std=c99 -O3 -pg
 
