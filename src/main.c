@@ -1,6 +1,5 @@
-#include "src/app.h"
-#include "src/keys.h"
-#include <ev.h>
+#include "app.h"
+#include "keys.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

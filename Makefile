@@ -6,8 +6,8 @@ CXXFLAGS := -Wall -Wextra -pedantic -std=c99 -O3 -pg
 
 # --- wsi-tvx ---
 
-bin/wsi-tvx: main.c $(SRC_FILES) $(HDR_FILES)
-	$(CC) main.c $(SRC_FILES) -o bin/wsi-tvx $(LDFLAGS) $(CXXFLAGS)
+bin/wsi-tvx: $(SRC_FILES) $(HDR_FILES)
+	$(CC) $(SRC_FILES) -o bin/wsi-tvx $(LDFLAGS) $(CXXFLAGS)
 
 # --- tests ---
 
