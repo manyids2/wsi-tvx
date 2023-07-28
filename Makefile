@@ -33,6 +33,10 @@ test:
 		make tests/bin/test-slide
 		make tests/bin/test-term
 
+install:
+		cp ./bin/wsi-tvx $(HOME)/.local/bin/wsi-tvx
+
+
 # --- cleanup ---
 
 clean:
